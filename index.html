@@ -2,1021 +2,737 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Revmaster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Safari Web App Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Revmaster">
-    
+    <meta name="theme-color" content="#000000">
+    <title>Revmaster</title>
     <style>
+        /* === BASE STYLES === */
         :root {
-            --bg-color: #000000;
-            --text-color: #ffffff;
-            --text-muted: #888888;
-            --border-color: #ffffff;
-            --border-dim: #333333;
-            --glow-color: #ffffff;
-            --error-color: #ff3b30;
-            --radius: 6px;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            color: var(--text-color);
-            font-family: var(--font-family);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 24px 16px;
-            overflow-x: hidden;
             color-scheme: dark;
+            --bg: #000000;
+            --text: #ffffff;
+            --border: #333333;
+            --glow: #ffffff;
+            --danger: #ff4444;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-        }
+        h1 { font-size: 3rem; text-align: center; margin-top: 30px; letter-spacing: 2px; }
+        .credit { text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 30px; letter-spacing: 1px; }
 
-        .hidden {
-            display: none !important;
-        }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; position: relative; }
 
-        /* Typography & Utilities */
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.05em;
-            line-height: 1.1;
-        }
-
-        .credit {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-top: 4px;
-        }
-
-        .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-dim);
-            padding-bottom: 6px;
-        }
-
-        /* Interactive Elements */
-        input[type="text"], input[type="date"], input[type="number"] {
-            width: 100%;
-            height: 42px;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 0 12px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        /* === UI COMPONENTS === */
+        input, button {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         input:focus {
-            box-shadow: 0 0 8px var(--glow-color);
+            border-color: var(--glow);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            outline: none;
         }
 
-        input.invalid {
-            border-color: var(--error-color) !important;
+        input.required-missing {
+            border-color: var(--danger);
+            box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
         }
 
-        button {
-            height: 42px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-color);
-            border-radius: var(--radius);
-            padding: 0 16px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: box-shadow 0.2s ease, opacity 0.2s ease;
-        }
+        button { cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--text); }
+        button:active { transform: scale(0.98); }
+        
+        .icon-btn { padding: 8px; border-radius: 50%; width: 40px; height: 40px; }
 
-        button:active {
-            opacity: 0.7;
-        }
+        /* === ICONS === */
+        .svg-icon { width: 20px; height: 20px; fill: currentColor; }
 
-        button.icon-btn {
-            width: 42px;
-            padding: 0;
-            flex-shrink: 0;
-        }
+        /* === MAIN PAGE === */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .date-picker-wrapper { display: flex; align-items: center; gap: 10px; }
+        .date-picker-wrapper input[type="date"] { border: none; font-size: 1.2rem; font-weight: bold; padding: 5px; cursor: pointer; }
+        
+        .settings-btn { position: absolute; top: 20px; right: 20px; }
+        .blink { animation: blinker 1.5s linear infinite; border-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
+        @keyframes blinker { 50% { opacity: 0.5; box-shadow: none; border-color: var(--border); } }
 
-        /* Specific Layout Blocks */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .task-list { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; }
+        .task-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 15px; border: 1px solid var(--border); border-radius: 8px;
+            transition: border-color 0.2s;
         }
+        .task-item:hover { border-color: rgba(255, 255, 255, 0.3); }
+        
+        .empty-state { text-align: center; color: #888; margin-top: 50px; font-style: italic; }
 
-        .settings-toggle {
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        .progress-container { margin-top: 40px; padding: 20px; border: 1px dashed var(--border); border-radius: 8px; text-align: center; }
+        .progress-text { font-size: 1.5rem; font-weight: bold; }
+
+        /* Custom Checkbox */
+        .chk-container {
+            display: inline-block; position: relative; width: 24px; height: 24px;
+            border: 2px solid var(--text); border-radius: 4px; cursor: pointer;
         }
-
-        @keyframes blink-border {
-            0% { border-color: var(--border-color); box-shadow: none; }
-            50% { border-color: var(--error-color); box-shadow: 0 0 8px var(--error-color); }
-            100% { border-color: var(--border-color); box-shadow: none; }
-        }
-
-        .blink {
-            animation: blink-border 1.5s infinite ease-in-out;
-        }
-
-        .date-display-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .file-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border: 1px solid var(--border-dim);
-            border-radius: var(--radius);
-        }
-
-        .checkbox-container {
-            position: relative;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .checkbox-container input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .checkmark {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 20px;
-            width: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-        }
-
-        .checkbox-container input:checked ~ .checkmark::after {
-            content: "";
-            position: absolute;
-            left: 6px;
-            top: 2px;
-            width: 5px;
-            height: 10px;
-            border: solid var(--text-color);
-            border-width: 0 2px 2px 0;
+        .chk-container.checked { background-color: var(--text); }
+        .chk-container.checked::after {
+            content: ''; position: absolute; left: 7px; top: 3px;
+            width: 5px; height: 12px; border: solid var(--bg); border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
 
-        .metric-card {
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
+        /* === SETTINGS PAGE === */
+        #settings-page {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 100; overflow-y: auto; padding: 20px;
         }
+        
+        .close-settings-btn { position: absolute; top: 20px; left: 20px; border-color: var(--text); }
+        
+        .settings-content { max-width: 600px; margin: 60px auto 40px auto; display: flex; flex-direction: column; gap: 30px; }
+        .settings-section { border: 1px solid var(--border); padding: 20px; border-radius: 8px; }
+        .settings-section h3 { margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        
+        .disclaimer { font-size: 0.8rem; color: #aaa; margin-top: 5px; }
+        
+        .list-items { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #111; border-radius: 6px; }
+        .list-actions { display: flex; gap: 10px; }
 
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-top: 4px;
-        }
+        .rev-days-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .rev-pill { padding: 5px 10px; border: 1px solid var(--text); border-radius: 20px; display: flex; align-items: center; gap: 8px; }
+        .rev-pill button { border: none; padding: 0; min-width: auto; height: auto; color: var(--danger); font-weight: bold; background: none; }
 
-        /* Dynamic Form Management Layouts */
-        .dynamic-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
+        .danger-btn { border-color: var(--danger); color: var(--danger); width: 100%; padding: 15px; font-weight: bold; }
+        .danger-btn:hover { background: rgba(255, 68, 68, 0.1); border-color: var(--danger); }
 
-        .dynamic-list {
-            margin-bottom: 12px;
-        }
-
-        .disclaimer {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-            margin-bottom: 12px;
-            padding: 8px;
-            border-left: 1px solid var(--border-color);
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .footer-summary {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* Modal / Dialog Base Structure */
+        /* === MODALS === */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; padding: 20px;
         }
+        .modal { background: #111; border: 1px solid var(--border); padding: 30px; border-radius: 12px; max-width: 400px; width: 100%; text-align: center; }
+        .modal h2 { margin-bottom: 15px; }
+        .modal p { margin-bottom: 25px; color: #ccc; }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; }
+        .modal-actions button { flex: 1; }
 
-        .modal-box {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 20px;
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        /* Custom revision day items configuration layout */
-        .rev-days-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .rev-day-chip {
-            border: 1px solid var(--border-dim);
-            border-radius: var(--radius);
-            padding: 6px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.85rem;
-        }
-
-        .rev-day-chip button {
-            border: none;
-            height: auto;
-            padding: 0 4px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 32px 16px;
-            border: 1px dashed var(--border-dim);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-        }
+        /* Utilities */
+        .hidden { display: none !important; }
+        .mt-1 { margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-view">
-        <!-- Header Unit -->
-        <div class="header-row">
-            <div>
-                <h1>Revmaster</h1>
-                <div class="credit">Designed by Pankaj Mehra</div>
-            </div>
-            <div class="settings-toggle" id="gear-btn" tabindex="0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    <!-- MAIN PAGE -->
+    <div id="main-page" class="container">
+        <h1>Revmaster</h1>
+        <div class="credit">Designed by Pankaj Mehra</div>
+
+        <button id="btn-open-settings" class="icon-btn settings-btn" title="Settings">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+        </button>
+
+        <div class="top-bar">
+            <span>Viewing Schedule For:</span>
+            <div class="date-picker-wrapper">
+                <input type="date" id="current-view-date">
             </div>
         </div>
 
-        <!-- Date Shift Unit -->
-        <div class="date-display-container">
-            <span>Date:</span>
-            <span id="date-text" style="text-decoration: underline; cursor: pointer;"></span>
-            <div id="date-input-wrapper" class="hidden" style="display:inline-flex; gap:6px;">
-                <input type="date" id="target-date-picker" style="width: 140px; height: 32px; padding: 0 6px;">
-                <button id="save-date-btn" class="icon-btn" style="width:32px; height:32px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-            </div>
-            <button id="edit-date-btn" class="icon-btn" style="border:none; width:auto; height:auto; padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <div id="task-list" class="task-list">
+            <!-- Tasks will be injected here -->
         </div>
 
-        <!-- File List Section -->
-        <div>
-            <div class="section-title">Revisions Due Today</div>
-            <div class="file-list" id="file-list-target"></div>
-        </div>
-
-        <!-- Metric Component -->
-        <div class="metric-card">
-            <div class="section-title" style="border:none; margin:0;">Task Completion</div>
-            <div class="metric-value" id="completion-metric">0%</div>
+        <div class="progress-container">
+            <div>Task Complete</div>
+            <div id="progress-text" class="progress-text">0%</div>
         </div>
     </div>
 
-    <div class="container hidden" id="settings-view">
-        <!-- Settings Header Unit -->
-        <div class="header-row">
-            <div>
-                <h1>Settings</h1>
-                <div class="credit">Configuration Panel</div>
-            </div>
-            <button class="icon-btn" id="close-settings-btn" style="border-radius: 50%;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
+    <!-- SETTINGS PAGE -->
+    <div id="settings-page">
+        <button id="btn-close-settings" class="icon-btn close-settings-btn" title="Back to Main">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
 
-        <!-- System Param Inputs -->
-        <div class="form-group">
-            <label for="first-book-name">First Book Name</label>
-            <div class="disclaimer">Use the exact name for the first file. (Excel/PDF/handwritten notes). For every new file, add 1, 2, 3, and so on to the first file name. Create only one file per day.</div>
-            <input type="text" id="first-book-name" placeholder="e.g., DW1">
-        </div>
+        <div class="settings-content">
+            <h2 style="text-align: center;">Settings</h2>
 
-        <div class="form-group">
-            <label for="first-book-date">First Book Date</label>
-            <input type="date" id="first-book-date">
-        </div>
+            <!-- Core Setup -->
+            <div class="settings-section">
+                <h3>Book Setup</h3>
+                <div class="input-group">
+                    <label>First Book Name</label>
+                    <input type="text" id="set-book-name" placeholder="e.g. DW1 or Notes 1">
+                    <div class="disclaimer">Use exact name. Will append 1, 2, 3... automatically. One file per day.</div>
+                </div>
+                <div class="input-group">
+                    <label>First Book Date</label>
+                    <input type="date" id="set-book-date">
+                    <div class="disclaimer">The day your first book was made.</div>
+                </div>
+            </div>
 
-        <!-- Holiday Ranges Component -->
-        <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Holiday Ranges</label>
-                <button id="add-holiday-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">+ Add Range</button>
+            <!-- Holidays -->
+            <div class="settings-section">
+                <h3>Holidays</h3>
+                <div class="disclaimer mb-2">Days where NO books are made AND NO revisions happen.</div>
+                <div class="input-row mt-1">
+                    <input type="date" id="hol-start" title="From Date">
+                    <span style="color:#aaa;">to</span>
+                    <input type="date" id="hol-end" title="To Date">
+                    <button id="btn-add-holiday">Add</button>
+                </div>
+                
+                <div class="input-row mt-1">
+                    <div class="chk-container" id="chk-show-holidays"></div>
+                    <span>Show all saved holidays (<span id="holiday-count-text">0</span> days total)</span>
+                </div>
+                <div id="holiday-list" class="list-items hidden"></div>
             </div>
-            <div style="margin: 6px 0; display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="toggle-holidays-list" checked style="accent-color:#fff;">
-                <span style="font-size:0.8rem; color:var(--text-muted);">Show input lists</span>
-            </div>
-            <div id="holiday-list-container" class="dynamic-list"></div>
-            <div class="footer-summary">
-                <span>Total Holiday Days:</span>
-                <span id="total-holiday-count" style="font-weight:bold;">0</span>
-            </div>
-        </div>
 
-        <!-- Revision Matrix Unit -->
-        <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <label>Revision Framework Intervals</label>
-                <button id="reset-rev-days-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">Reset Defaults</button>
+            <!-- Revisions -->
+            <div class="settings-section">
+                <h3>Revision Dates</h3>
+                <div class="disclaimer">Set intervals (in days) for revisions.</div>
+                <div class="input-row mt-1">
+                    <input type="number" id="rev-day-input" placeholder="Day #" min="0" style="width: 80px;">
+                    <button id="btn-add-rev">Add Day</button>
+                    <button id="btn-reset-rev" style="margin-left: auto;">Reset Default</button>
+                </div>
+                <div id="rev-days-list" class="rev-days-container"></div>
             </div>
-            <div class="rev-days-grid" id="rev-days-container"></div>
-            <div style="display:flex; gap:8px;">
-                <input type="number" id="new-rev-day-input" placeholder="e.g., 45" style="height:32px;">
-                <button id="add-rev-day-btn" style="height:32px; padding:0 12px; font-size:0.85rem;">Add Day</button>
-            </div>
-        </div>
 
-        <!-- System Halts / Lifecycle Multi-inputs -->
-        <div class="form-group" style="border-top: 1px solid var(--border-dim); padding-top:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <label>Creation Halts (Revision Persists)</label>
-                <button id="add-halt-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">+ Add Block</button>
+            <!-- Pauses -->
+            <div class="settings-section">
+                <h3>Book Making Pauses</h3>
+                <div class="disclaimer">Period where Book Making STOPS, but Revisions CONTINUE.</div>
+                <div class="input-row mt-1">
+                    <input type="date" id="pause-end" title="End Date of Book Making">
+                    <span style="color:#aaa;">to</span>
+                    <input type="date" id="pause-restart" title="Restart Date">
+                    <button id="btn-add-pause">Add</button>
+                </div>
+                <div id="pause-list" class="list-items"></div>
             </div>
-            <div id="halt-list-container" class="dynamic-list"></div>
-        </div>
 
-        <!-- Clear State Trigger Section -->
-        <div style="margin-top: 20px; border-top: 1px solid var(--border-dim); padding-top: 20px;">
-            <div class="disclaimer" style="border-left-color: var(--error-color);">Danger Zone: Resetting will completely drop all internal schedules, parameters, history logging, and tracking metrics permanently.</div>
-            <button id="factory-reset-btn" style="width:100%; border-color:var(--error-color); color:var(--error-color);">Erase Data and Reset</button>
+            <!-- Danger -->
+            <div class="settings-section" style="border-color: var(--danger);">
+                <button id="btn-erase-data" class="danger-btn">Erase All Data & Reset</button>
+            </div>
         </div>
     </div>
 
-    <!-- Global Application Modal Stack -->
-    <div class="modal-overlay hidden" id="app-modal">
-        <div class="modal-box">
-            <h3 id="modal-title">Notification</h3>
-            <p id="modal-body" style="font-size:0.9rem; line-height:1.5; color:var(--text-muted);"></p>
-            <div class="modal-buttons">
-                <button id="modal-cancel-btn" class="hidden">Cancel</button>
-                <button id="modal-ok-btn">OK</button>
+    <!-- MODALS -->
+    <div id="modal-welcome" class="modal-overlay">
+        <div class="modal">
+            <h2>Welcome to Revmaster</h2>
+            <p>Please go to Settings and fill in the required data (First Book Name & Date) to calculate your revision schedule.</p>
+            <button id="btn-welcome-ok" style="width: 100%;">OK</button>
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="modal-overlay">
+        <div class="modal">
+            <h2 id="confirm-title">Are you sure?</h2>
+            <p id="confirm-msg">This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button id="btn-confirm-no" style="border-color: #888; color: #888;">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> Cancel
+                </button>
+                <button id="btn-confirm-yes" style="border-color: var(--text);">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Confirm
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // State Management Objects
-        const CONFIG = {
-            storageKeys: {
-                firstBookName: 'revmaster_book_name',
-                firstBookDate: 'revmaster_book_date',
-                holidays: 'revmaster_holidays',
-                revDays: 'revmaster_rev_days',
-                halts: 'revmaster_halts',
-                ticks: 'revmaster_ticks',
-                visited: 'revmaster_visited'
-            },
-            defaultRevDays: [0, 1, 3, 7, 15, 30, 90, 180, 360]
-        };
-
+        /** === CORE STATE & CONSTANTS === */
+        const STORAGE_KEY = 'revmaster_data';
+        const DEFAULT_REVS = [0, 1, 3, 7, 15, 30, 90, 180, 360];
+        
         let state = {
+            hasVisited: false,
             firstBookName: '',
             firstBookDate: '',
-            holidays: [], // array of {from: '', to: ''}
-            revDays: [...CONFIG.defaultRevDays],
-            halts: [], // array of {end: '', restart: ''}
-            ticks: {}, // map of "fileName_dayX" -> boolean
-            currentViewDate: new Date().toISOString().split('T')[0]
+            revisionDays: [...DEFAULT_REVS],
+            holidays: [], // {start, end, id}
+            pauses: [], // {end, restart, id}
+            ticks: {} // "YYYY-MM-DD|FileName|RevDay": true/false
         };
 
-        // DOM Initializers
-        const mainView = document.getElementById('main-view');
-        const settingsView = document.getElementById('settings-view');
-        const gearBtn = document.getElementById('gear-btn');
-        const closeSettingsBtn = document.getElementById('close-settings-btn');
-        const dateText = document.getElementById('date-text');
-        const dateInputWrapper = document.getElementById('date-input-wrapper');
-        const targetDatePicker = document.getElementById('target-date-picker');
-        const saveDateBtn = document.getElementById('save-date-btn');
-        const editDateBtn = document.getElementById('edit-date-btn');
-        const fileListTarget = document.getElementById('file-list-target');
-        const completionMetric = document.getElementById('completion-metric');
-
-        const inputFirstBookName = document.getElementById('first-book-name');
-        const inputFirstBookDate = document.getElementById('first-book-date');
-        const holidayListContainer = document.getElementById('holiday-list-container');
-        const toggleHolidaysList = document.getElementById('toggle-holidays-list');
-        const totalHolidayCount = document.getElementById('total-holiday-count');
-        const addHolidayBtn = document.getElementById('add-holiday-btn');
-        const revDaysContainer = document.getElementById('rev-days-container');
-        const newRevDayInput = document.getElementById('new-rev-day-input');
-        const addRevDayBtn = document.getElementById('add-rev-day-btn');
-        const resetRevDaysBtn = document.getElementById('reset-rev-days-btn');
-        const haltListContainer = document.getElementById('halt-list-container');
-        const addHaltBtn = document.getElementById('add-halt-btn');
-        const factoryResetBtn = document.getElementById('factory-reset-btn');
-
-        const appModal = document.getElementById('app-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-        const modalOkBtn = document.getElementById('modal-ok-btn');
-        const modalCancelBtn = document.getElementById('modal-cancel-btn');
-
-        // Modal Engine Trigger
-        function showModal(title, text, confirmMode = false, onConfirm = null) {
-            modalTitle.textContent = title;
-            modalBody.textContent = text;
-            appModal.classList.remove('hidden');
+        // DOM Elements
+        const DOM = {
+            mainPage: document.getElementById('main-page'),
+            settingsPage: document.getElementById('settings-page'),
+            btnOpenSettings: document.getElementById('btn-open-settings'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
             
-            if (confirmMode) {
-                modalCancelBtn.classList.remove('hidden');
-            } else {
-                modalCancelBtn.classList.add('hidden');
-            }
-
-            modalOkBtn.onclick = () => {
-                appModal.classList.add('hidden');
-                if (onConfirm) onConfirm();
-            };
-            modalCancelBtn.onclick = () => {
-                appModal.classList.add('hidden');
-            };
-        }
-
-        // Data Storage Engine Syncs
-        function loadState() {
-            state.firstBookName = localStorage.getItem(CONFIG.storageKeys.firstBookName) || '';
-            state.firstBookDate = localStorage.getItem(CONFIG.storageKeys.firstBookDate) || '';
+            viewDate: document.getElementById('current-view-date'),
+            taskList: document.getElementById('task-list'),
+            progressText: document.getElementById('progress-text'),
             
-            const rawHolidays = localStorage.getItem(CONFIG.storageKeys.holidays);
-            state.holidays = rawHolidays ? JSON.parse(rawHolidays) : [];
-
-            const rawRevDays = localStorage.getItem(CONFIG.storageKeys.revDays);
-            state.revDays = rawRevDays ? JSON.parse(rawRevDays) : [...CONFIG.defaultRevDays];
-            state.revDays.sort((a, b) => a - b);
-
-            const rawHalts = localStorage.getItem(CONFIG.storageKeys.halts);
-            state.halts = rawHalts ? JSON.parse(rawHalts) : [];
-
-            const rawTicks = localStorage.getItem(CONFIG.storageKeys.ticks);
-            state.ticks = rawTicks ? JSON.parse(rawTicks) : {};
-        }
-
-        function saveStateParam(key, value) {
-            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-        }
-
-        // Data processing Engine Logic
-        function parseDate(dateStr) {
-            const parts = dateStr.split('-');
-            return new Date(parts[0], parts[1] - 1, parts[2]);
-        }
-
-        function formatDateDisplay(dateStr) {
-            const d = parseDate(dateStr);
-            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        function isDateInRanges(dateObj, ranges, mode = 'holiday') {
-            const time = dateObj.getTime();
-            for (let r of ranges) {
-                if (mode === 'holiday') {
-                    if (!r.from || !r.to) continue;
-                    const start = parseDate(r.from).getTime();
-                    const end = parseDate(r.to).getTime();
-                    if (time >= start && time <= end) return true;
-                } else if (mode === 'halt') {
-                    if (!r.end) continue;
-                    const start = parseDate(r.end).getTime();
-                    const end = r.restart ? parseDate(r.restart).getTime() : Infinity;
-                    if (time >= start && time <= end) return true;
-                }
-            }
-            return false;
-        }
-
-        function countTotalHolidays() {
-            let total = 0;
-            state.holidays.forEach(r => {
-                if (r.from && r.to) {
-                    const s = parseDate(r.from);
-                    const e = parseDate(r.to);
-                    if (e >= s) {
-                        total += Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
-                    }
-                }
-            });
-            totalHolidayCount.textContent = total;
-        }
-
-        // Processing Framework Timeline Mapping Matrix
-        function buildTimelineStructure(targetDateStr) {
-            if (!state.firstBookDate || !state.firstBookName) return { filesMap: {}, dueToday: [], metrics: { completed: 0, total: 0 } };
-
-            const startDate = parseDate(state.firstBookDate);
-            const endDate = parseDate(targetDateStr);
+            setBookName: document.getElementById('set-book-name'),
+            setBookDate: document.getElementById('set-book-date'),
             
-            if (endDate < startDate) return { filesMap: {}, dueToday: [], metrics: { completed: 0, total: 0 } };
-
-            // Tracks the map of each calendar date to what file was made on it
-            let fileCreationMap = {}; 
-            let currentFileIdx = 1;
-
-            let loopDate = new Date(startDate);
-            const endLoopTime = endDate.getTime();
-
-            // Extract numeric root token from user base configuration string
-            const baseMatch = state.firstBookName.match(/^([a-zA-Z\s_-]+)?(\d+)?$/);
-            let prefix = baseMatch && baseMatch[1] ? baseMatch[1] : "DW";
-            let startNum = baseMatch && baseMatch[2] ? parseInt(baseMatch[2], 10) : 1;
-
-            // Generate structural baseline chronological maps up to target context date
-            while (loopDate.getTime() <= endLoopTime) {
-                if (isDateInRanges(loopDate, state.holidays, 'holiday')) {
-                    loopDate.setDate(loopDate.getDate() + 1);
-                    continue;
-                }
-
-                const isHalted = isDateInRanges(loopDate, state.halts, 'halt');
-                const currentDateKey = loopDate.toISOString().split('T')[0];
-
-                if (!isHalted) {
-                    const currentFileNum = startNum + currentFileIdx - 1;
-                    const computedFileName = `${prefix}${currentFileNum}`;
-                    fileCreationMap[currentDateKey] = computedFileName;
-                    currentFileIdx++;
-                } else {
-                    fileCreationMap[currentDateKey] = null; // No file creation, tracking active revision frame window only
-                }
-
-                loopDate.setDate(loopDate.getDate() + 1);
-            }
-
-            // Extract scheduling calculations matrix for the evaluation target scope date
-            let dueToday = [];
-            let totalTasksToDateCount = 0;
-            let completedTasksToDateCount = 0;
-
-            const targetTime = endDate.getTime();
-            const isTargetHoliday = isDateInRanges(endDate, state.holidays, 'holiday');
-
-            // Global evaluation scan over all baseline generation nodes
-            let evaluationLoopDate = new Date(startDate);
-            while (evaluationLoopDate.getTime() <= targetTime) {
-                const evalDateKey = evaluationLoopDate.toISOString().split('T')[0];
-                
-                if (isDateInRanges(evaluationLoopDate, state.holidays, 'holiday')) {
-                    evaluationLoopDate.setDate(evaluationLoopDate.getDate() + 1);
-                    continue;
-                }
-
-                // Calculate assignments for tasks generated on past dates
-                let activeDaysSinceCreation = 0;
-                let ageRunner = new Date(evaluationLoopDate);
-                
-                while (ageRunner.getTime() <= targetTime) {
-                    const runnerKey = ageRunner.toISOString().split('T')[0];
-                    if (!isDateInRanges(ageRunner, state.holidays, 'holiday')) {
-                        // Check tasks due exactly *on the runner date* relative to creation baseline element
-                        state.revDays.forEach(dayInterval => {
-                            if (activeDaysSinceCreation === dayInterval) {
-                                const fileCreated = fileCreationMap[evalDateKey];
-                                if (fileCreated) {
-                                    const taskKey = `${fileCreated}_day${dayInterval}`;
-                                    const isDone = !!state.ticks[taskKey];
-                                    
-                                    // Process tracking increments up to current targeted view perspective state
-                                    totalTasksToDateCount++;
-                                    if (isDone) completedTasksToDateCount++;
-
-                                    if (runnerKey === targetDateStr && !isTargetHoliday) {
-                                        dueToday.push({
-                                            fileName: fileCreated,
-                                            interval: dayInterval,
-                                            taskKey: taskKey,
-                                            checked: isDone
-                                        });
-                                    }
-                                }
-                            }
-                        });
-                        activeDaysSinceCreation++;
-                    }
-                    ageRunner.setDate(ageRunner.getDate() + 1);
-                }
-
-                evaluationLoopDate.setDate(evaluationLoopDate.getDate() + 1);
-            }
-
-            return {
-                dueToday: dueToday,
-                metrics: {
-                    completed: completedTasksToDateCount,
-                    total: totalTasksToDateCount
-                }
-            };
-        }
-
-        // Interface Render Engines
-        function renderMainInterface() {
-            dateText.textContent = formatDateDisplay(state.currentViewDate);
-            targetDatePicker.value = state.currentViewDate;
-
-            // Validate configuration dependencies are met
-            if (!state.firstBookName || !state.firstBookDate) {
-                gearBtn.classList.add('blink');
-                fileListTarget.innerHTML = `<div class="empty-state">Required parameters unassigned.<br>Access settings block to resolve initialization values.</div>`;
-                completionMetric.textContent = "0%";
-                return;
-            }
-
-            gearBtn.classList.remove('blink');
-            const dataPackage = buildTimelineStructure(state.currentViewDate);
-
-            // Print targeted checklist output collection sets
-            if (dataPackage.dueToday.length === 0) {
-                fileListTarget.innerHTML = `<div class="empty-state">No revision files scheduled for today.</div>`;
-            } else {
-                fileListTarget.innerHTML = '';
-                dataPackage.dueToday.forEach(item => {
-                    const row = document.createElement('div');
-                    row.className = 'file-row';
-
-                    const labelId = `chk-${item.taskKey}`;
-                    row.innerHTML = `
-                        <label class="checkbox-container" for="${labelId}">
-                            <input type="checkbox" id="${labelId}" ${item.checked ? 'checked' : ''}>
-                            <span class="checkmark"></span>
-                        </label>
-                        <div style="font-size: 0.95rem; font-weight: 500;">${item.fileName} <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 6px;">Day ${item.interval}</span></div>
-                    `;
-
-                    // Dynamic checkbox event pipeline
-                    row.querySelector('input').addEventListener('change', (e) => {
-                        if (e.target.checked) {
-                            state.ticks[item.taskKey] = true;
-                        } else {
-                            delete state.ticks[item.taskKey];
-                        }
-                        saveStateParam(CONFIG.storageKeys.ticks, state.ticks);
-                        
-                        // Local recalculation bypass layout stutter
-                        const updatePackage = buildTimelineStructure(state.currentViewDate);
-                        calculateMetricsDisplay(updatePackage.metrics);
-                    });
-
-                    fileListTarget.appendChild(row);
-                });
-            }
-
-            calculateMetricsDisplay(dataPackage.metrics);
-        }
-
-        function calculateMetricsDisplay(metrics) {
-            if (metrics.total === 0) {
-                completionMetric.textContent = "0%";
-            } else {
-                const percentage = Math.round((metrics.completed / metrics.total) * 100);
-                completionMetric.textContent = `${percentage}%`;
-            }
-        }
-
-        function renderSettingsInterface() {
-            inputFirstBookName.value = state.firstBookName;
-            inputFirstBookDate.value = state.firstBookDate;
+            holStart: document.getElementById('hol-start'),
+            holEnd: document.getElementById('hol-end'),
+            btnAddHoliday: document.getElementById('btn-add-holiday'),
+            holidayList: document.getElementById('holiday-list'),
+            chkShowHolidays: document.getElementById('chk-show-holidays'),
+            holidayCountText: document.getElementById('holiday-count-text'),
             
-            // Check structural validity outlines dynamically
-            verifyRequiredSettingsFields();
-
-            countTotalHolidays();
-            renderHolidayInputRows();
-            renderRevisionDaysFrameworkGrid();
-            renderHaltInputRows();
-        }
-
-        function verifyRequiredSettingsFields() {
-            if (!state.firstBookName) inputFirstBookName.classList.add('invalid');
-            else inputFirstBookName.classList.remove('invalid');
-
-            if (!state.firstBookDate) inputFirstBookDate.classList.add('invalid');
-            else inputFirstBookDate.classList.remove('invalid');
-        }
-
-        function renderHolidayInputRows() {
-            if (!toggleHolidaysList.checked) {
-                holidayListContainer.innerHTML = '';
-                return;
+            pauseEnd: document.getElementById('pause-end'),
+            pauseRestart: document.getElementById('pause-restart'),
+            btnAddPause: document.getElementById('btn-add-pause'),
+            pauseList: document.getElementById('pause-list'),
+            
+            revInput: document.getElementById('rev-day-input'),
+            btnAddRev: document.getElementById('btn-add-rev'),
+            btnResetRev: document.getElementById('btn-reset-rev'),
+            revDaysList: document.getElementById('rev-days-list'),
+            
+            btnEraseData: document.getElementById('btn-erase-data'),
+            
+            modals: {
+                welcome: document.getElementById('modal-welcome'),
+                welcomeOk: document.getElementById('btn-welcome-ok'),
+                confirm: document.getElementById('modal-confirm'),
+                confirmTitle: document.getElementById('confirm-title'),
+                confirmMsg: document.getElementById('confirm-msg'),
+                confirmYes: document.getElementById('btn-confirm-yes'),
+                confirmNo: document.getElementById('btn-confirm-no')
             }
+        };
 
-            holidayListContainer.innerHTML = '';
-            state.holidays.forEach((item, index) => {
-                const row = document.createElement('div');
-                row.className = 'dynamic-row';
-                row.innerHTML = `
-                    <span style="font-size:0.8rem; color:var(--text-muted); width:45px;">R${index+1}</span>
-                    <input type="date" value="${item.from}" class="hl-from" style="height:34px;">
-                    <span style="font-size:0.8rem; color:var(--text-muted);">to</span>
-                    <input type="date" value="${item.to}" class="hl-to" style="height:34px;">
-                    <button class="icon-btn del-hl-btn" style="height:34px; width:34px; border-color:var(--border-dim);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                `;
+        let confirmCallback = null;
 
-                // Interactive inline capture listeners
-                row.querySelector('.hl-from').addEventListener('change', (e) => {
-                    state.holidays[index].from = e.target.value;
-                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
-                    countTotalHolidays();
-                });
-                row.querySelector('.hl-to').addEventListener('change', (e) => {
-                    state.holidays[index].to = e.target.value;
-                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
-                    countTotalHolidays();
-                });
-                row.querySelector('.del-hl-btn').addEventListener('click', () => {
-                    state.holidays.splice(index, 1);
-                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
-                    countTotalHolidays();
-                    renderHolidayInputRows();
-                });
-
-                holidayListContainer.appendChild(row);
-            });
-        }
-
-        function renderRevisionDaysFrameworkGrid() {
-            revDaysContainer.innerHTML = '';
-            state.revDays.forEach(day => {
-                const chip = document.createElement('div');
-                chip.className = 'rev-day-chip';
-                chip.innerHTML = `
-                    <span>Day ${day}</span>
-                    <button data-day="${day}">✕</button>
-                `;
-                chip.querySelector('button').addEventListener('click', (e) => {
-                    const targetDay = parseInt(e.target.getAttribute('data-day'), 10);
-                    showModal("Change Revision Date", "You are about to change the revision date matrix structure.", true, () => {
-                        state.revDays = state.revDays.filter(d => d !== targetDay);
-                        saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
-                        renderRevisionDaysFrameworkGrid();
-                    });
-                });
-                revDaysContainer.appendChild(chip);
-            });
-        }
-
-        function renderHaltInputRows() {
-            haltListContainer.innerHTML = '';
-            state.halts.forEach((item, index) => {
-                const row = document.createElement('div');
-                row.className = 'dynamic-row';
-                row.innerHTML = `
-                    <input type="date" value="${item.end}" class="halt-end" style="height:34px;" placeholder="End production">
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Restart</span>
-                    <input type="date" value="${item.restart || ''}" class="halt-restart" style="height:34px;">
-                    <button class="icon-btn del-halt-btn" style="height:34px; width:34px; border-color:var(--border-dim);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                `;
-
-                row.querySelector('.halt-end').addEventListener('change', (e) => {
-                    state.halts[index].end = e.target.value;
-                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
-                });
-                row.querySelector('.halt-restart').addEventListener('change', (e) => {
-                    state.halts[index].restart = e.target.value;
-                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
-                });
-                row.querySelector('.del-halt-btn').addEventListener('click', () => {
-                    state.halts.splice(index, 1);
-                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
-                    renderHaltInputRows();
-                });
-
-                haltListContainer.appendChild(row);
-            });
-        }
-
-        // View Toggling Handlers
-        function initViewRouting() {
-            gearBtn.addEventListener('click', () => {
-                mainView.classList.add('hidden');
-                settingsView.classList.remove('hidden');
-                renderSettingsInterface();
-            });
-
-            closeSettingsBtn.addEventListener('click', () => {
-                if (!state.firstBookName || !state.firstBookDate) {
-                    showModal("Missing Inputs", "Please enter valid configuration fields for Book Name and Startup Baseline Date.");
-                    verifyRequiredSettingsFields();
-                    return;
-                }
-                settingsView.classList.add('hidden');
-                mainView.classList.remove('hidden');
-                renderMainInterface();
-            });
-
-            // Inline Date Picker toggle interfaces
-            editDateBtn.addEventListener('click', () => {
-                dateText.classList.add('hidden');
-                editDateBtn.classList.add('hidden');
-                dateInputWrapper.classList.remove('hidden');
-            });
-
-            dateText.addEventListener('click', () => {
-                dateText.classList.add('hidden');
-                editDateBtn.classList.add('hidden');
-                dateInputWrapper.classList.remove('hidden');
-            });
-
-            saveDateBtn.addEventListener('click', () => {
-                if (targetDatePicker.value) {
-                    state.currentViewDate = targetDatePicker.value;
-                    dateInputWrapper.classList.add('hidden');
-                    dateText.classList.remove('hidden');
-                    editDateBtn.classList.remove('hidden');
-                    renderMainInterface();
-                }
-            });
-        }
-
-        // Settings Parameter Pipeline Bindings
-        function initSettingsFormListeners() {
-            inputFirstBookName.addEventListener('change', (e) => {
-                state.firstBookName = e.target.value.trim();
-                saveStateParam(CONFIG.storageKeys.firstBookName, state.firstBookName);
-                verifyRequiredSettingsFields();
-            });
-
-            inputFirstBookDate.addEventListener('change', (e) => {
-                state.firstBookDate = e.target.value;
-                saveStateParam(CONFIG.storageKeys.firstBookDate, state.firstBookDate);
-                verifyRequiredSettingsFields();
-            });
-
-            toggleHolidaysList.addEventListener('change', () => {
-                renderHolidayInputRows();
-            });
-
-            addHolidayBtn.addEventListener('click', () => {
-                state.holidays.push({ from: state.currentViewDate, to: state.currentViewDate });
-                saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
-                renderHolidayInputRows();
-                countTotalHolidays();
-            });
-
-            addRevDayBtn.addEventListener('click', () => {
-                const val = parseInt(newRevDayInput.value, 10);
-                if (!isNaN(val) && val >= 0) {
-                    if (state.revDays.includes(val)) {
-                        showModal("Duplicate Value", "This milestone interval day is already active.");
-                        return;
-                    }
-                    showModal("Change Revision Date", "You are about to change the revision date matrix structure.", true, () => {
-                        state.revDays.push(val);
-                        state.revDays.sort((a, b) => a - b);
-                        saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
-                        newRevDayInput.value = '';
-                        renderRevisionDaysFrameworkGrid();
-                    });
-                }
-            });
-
-            resetRevDaysBtn.addEventListener('click', () => {
-                showModal("Reset Matrix", "Restore standard tracking intervals?", true, () => {
-                    state.revDays = [...CONFIG.defaultRevDays];
-                    saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
-                    renderRevisionDaysFrameworkGrid();
-                });
-            });
-
-            addHaltBtn.addEventListener('click', () => {
-                state.halts.push({ end: state.currentViewDate, restart: '' });
-                saveStateParam(CONFIG.storageKeys.halts, state.halts);
-                renderHaltInputRows();
-            });
-
-            factoryResetBtn.addEventListener('click', () => {
-                showModal("Confirm Destructive Reset", "Are you absolutely sure? This will remove all your structural settings and saved file scheduling statistics permanently.", true, () => {
-                    localStorage.clear();
-                    loadState();
-                    state.currentViewDate = new Date().toISOString().split('T')[0];
-                    settingsView.classList.add('hidden');
-                    mainView.classList.remove('hidden');
-                    renderMainInterface();
-                    showModal("System Reset Complete", "All local application tracking dictionaries dropped successfully.");
-                });
-            });
-        }
-
-        // App Initializer Lifecycle
-        function runApplicationLifecycle() {
+        /** === INITIALIZATION === */
+        function init() {
             loadState();
-            initViewRouting();
-            initSettingsFormListeners();
+            setupEventListeners();
             
-            // First time initialization checks
-            const hasVisited = localStorage.getItem(CONFIG.storageKeys.visited);
-            if (!hasVisited) {
-                showModal("Welcome to Revmaster", "Welcome to \"Revmaster\". Select the settings configuration node to provision active initialization values.", false, () => {
-                    localStorage.setItem(CONFIG.storageKeys.visited, 'true');
-                    mainView.classList.add('hidden');
-                    settingsView.classList.remove('hidden');
-                    renderSettingsInterface();
-                });
-            } else {
-                renderMainInterface();
+            if (!state.hasVisited) {
+                DOM.modals.welcome.style.display = 'flex';
+                state.hasVisited = true;
+                saveState();
+            }
+
+            // Set today's date if empty
+            if (!DOM.viewDate.value) {
+                DOM.viewDate.value = getTodayStr();
+            }
+
+            updateUI();
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    state = { ...state, ...JSON.parse(saved) };
+                    // Ensure rev arrays are numbers
+                    state.revisionDays = state.revisionDays.map(Number).sort((a,b)=>a-b);
+                } catch(e) { console.error("Error loading state", e); }
             }
         }
 
-        // Entry point assignment
-        window.addEventListener('DOMContentLoaded', runApplicationLifecycle);
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        /** === UTILITIES === */
+        function getTodayStr() {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+        }
+
+        function generateId() { return Math.random().toString(36).substr(2, 9); }
+
+        function getDatesBetween(startStr, endStr) {
+            let dates = [];
+            let curr = new Date(startStr);
+            let end = new Date(endStr);
+            while(curr <= end) {
+                dates.push(curr.toISOString().split('T')[0]);
+                curr.setDate(curr.getDate() + 1);
+            }
+            return dates;
+        }
+
+        function parseBookName(name) {
+            name = name.trim();
+            const match = name.match(/^(.*?)(\d+)$/);
+            if (match) return { prefix: match[1], startNum: parseInt(match[2], 10) };
+            return { prefix: name, startNum: 1 };
+        }
+
+        function showConfirm(title, msg, onConfirm) {
+            DOM.modals.confirmTitle.textContent = title;
+            DOM.modals.confirmMsg.textContent = msg;
+            DOM.modals.confirm.style.display = 'flex';
+            confirmCallback = onConfirm;
+        }
+
+        function closeConfirm() {
+            DOM.modals.confirm.style.display = 'none';
+            confirmCallback = null;
+        }
+
+        /** === ENGINE (LOGIC) === */
+        function buildDateSets() {
+            let holidaySet = new Set();
+            let totalHolidayDays = 0;
+            state.holidays.forEach(h => {
+                const dates = getDatesBetween(h.start, h.end);
+                dates.forEach(d => holidaySet.add(d));
+                totalHolidayDays += dates.length;
+            });
+
+            let pauseSet = new Set();
+            state.pauses.forEach(p => {
+                getDatesBetween(p.end, p.restart).forEach(d => pauseSet.add(d));
+            });
+
+            DOM.holidayCountText.textContent = totalHolidayDays;
+            return { holidaySet, pauseSet };
+        }
+
+        function calculateSchedule(targetDateStr) {
+            if (!state.firstBookDate || !state.firstBookName) return null;
+
+            const { holidaySet, pauseSet } = buildDateSets();
+            
+            // If target date is a holiday, absolutely no revisions happen
+            if (holidaySet.has(targetDateStr)) return [];
+
+            const { prefix, startNum } = parseBookName(state.firstBookName);
+            let books = [];
+            
+            let curr = new Date(state.firstBookDate);
+            let target = new Date(targetDateStr);
+            let fileNum = startNum;
+
+            // 1. Build list of all books created up to targetDate
+            while(curr <= target) {
+                let dStr = curr.toISOString().split('T')[0];
+                if (holidaySet.has(dStr)) {
+                    // Holiday: No book made
+                } else if (pauseSet.has(dStr)) {
+                    // Pause: No book made, but revisions exist
+                } else {
+                    // Normal day: Book made
+                    books.push({ name: prefix + fileNum, createDate: dStr });
+                    fileNum++;
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+
+            // 2. Calculate "Active Age" for each book on targetDate
+            let schedule = [];
+            books.forEach(book => {
+                let age = 0;
+                let bd = new Date(book.createDate);
+                bd.setDate(bd.getDate() + 1); // Age starts incrementing the day AFTER creation
+                
+                // If creating today, age is 0
+                if (book.createDate === targetDateStr) {
+                    age = 0;
+                } else {
+                    while(bd <= target) {
+                        let stepStr = bd.toISOString().split('T')[0];
+                        if (!holidaySet.has(stepStr)) {
+                            age++; // Only age on non-holidays
+                        }
+                        bd.setDate(bd.getDate() + 1);
+                    }
+                }
+
+                if (state.revisionDays.includes(age)) {
+                    schedule.push({
+                        fileName: book.name,
+                        revDay: age,
+                        key: `${targetDateStr}|${book.name}|${age}`
+                    });
+                }
+            });
+
+            return schedule;
+        }
+
+        function calculateProgress() {
+            if (!state.firstBookDate || !state.firstBookName) return 0;
+            
+            const todayStr = getTodayStr();
+            const firstD = new Date(state.firstBookDate);
+            const todayD = new Date(todayStr);
+            
+            if (firstD > todayD) return 0;
+
+            // Simplified historical simulation to calculate total completion
+            // Note: Since this could get heavy over many years, we limit to avoid lockup
+            let totalTasks = 0;
+            let completedTasks = 0;
+            let curr = new Date(state.firstBookDate);
+            
+            while(curr <= todayD) {
+                let dStr = curr.toISOString().split('T')[0];
+                let sched = calculateSchedule(dStr);
+                if (sched && sched.length > 0) {
+                    totalTasks += sched.length;
+                    sched.forEach(task => {
+                        if (state.ticks[task.key]) completedTasks++;
+                    });
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+
+            if (totalTasks === 0) return 0;
+            return Math.round((completedTasks / totalTasks) * 100);
+        }
+
+        /** === UI UPDATES === */
+        function updateUI() {
+            // Update settings inputs
+            DOM.setBookName.value = state.firstBookName;
+            DOM.setBookDate.value = state.firstBookDate;
+            
+            // Validation highlighting & Blinking
+            const missingReq = !state.firstBookName || !state.firstBookDate;
+            DOM.setBookName.classList.toggle('required-missing', !state.firstBookName);
+            DOM.setBookDate.classList.toggle('required-missing', !state.firstBookDate);
+            DOM.btnOpenSettings.classList.toggle('blink', missingReq);
+
+            renderSettingsLists();
+            
+            // If missing required, clear main page view
+            if (missingReq) {
+                DOM.taskList.innerHTML = `<div class="empty-state">Please fill First Book Name and Date in Settings to view schedule.</div>`;
+                DOM.progressText.textContent = "0%";
+                return;
+            }
+
+            renderMainPage();
+        }
+
+        function renderMainPage() {
+            const targetDate = DOM.viewDate.value;
+            const schedule = calculateSchedule(targetDate);
+            
+            DOM.taskList.innerHTML = '';
+            
+            if (!schedule || schedule.length === 0) {
+                const { holidaySet } = buildDateSets();
+                const msg = holidaySet.has(targetDate) ? "Holiday! Enjoy your day off." : "No files scheduled for revision today.";
+                DOM.taskList.innerHTML = `<div class="empty-state">${msg}</div>`;
+            } else {
+                schedule.forEach(task => {
+                    const isChecked = !!state.ticks[task.key];
+                    const item = document.createElement('div');
+                    item.className = 'task-item';
+                    item.innerHTML = `
+                        <div class="chk-container ${isChecked ? 'checked' : ''}" data-key="${task.key}"></div>
+                        <div>
+                            <strong>${task.fileName}</strong> 
+                            <span style="color:#aaa; font-size:0.9em; margin-left: 8px;">(Day ${task.revDay})</span>
+                        </div>
+                    `;
+                    DOM.taskList.appendChild(item);
+                });
+            }
+
+            const percent = calculateProgress();
+            DOM.progressText.textContent = percent + "%";
+        }
+
+        function renderSettingsLists() {
+            // Holidays
+            DOM.holidayList.innerHTML = '';
+            state.holidays.forEach(h => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <span>${h.start} to ${h.end}</span>
+                    <div class="list-actions">
+                        <button class="icon-btn" onclick="editHoliday('${h.id}')" title="Edit">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                        </button>
+                    </div>
+                `;
+                DOM.holidayList.appendChild(item);
+            });
+            buildDateSets(); // update holiday count
+
+            // Pauses
+            DOM.pauseList.innerHTML = '';
+            state.pauses.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <span>End: ${p.end} | Restart: ${p.restart}</span>
+                    <button class="icon-btn" onclick="deletePause('${p.id}')" title="Delete">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                `;
+                DOM.pauseList.appendChild(item);
+            });
+
+            // Revisions
+            DOM.revDaysList.innerHTML = '';
+            state.revisionDays.forEach(day => {
+                const pill = document.createElement('div');
+                pill.className = 'rev-pill';
+                pill.innerHTML = `
+                    Day ${day}
+                    <button onclick="deleteRevDay(${day})">✕</button>
+                `;
+                DOM.revDaysList.appendChild(pill);
+            });
+        }
+
+        /** === GLOBAL EXPORTS FOR INLINE ONCLICK === */
+        window.editHoliday = function(id) {
+            const h = state.holidays.find(x => x.id === id);
+            if(h) {
+                DOM.holStart.value = h.start;
+                DOM.holEnd.value = h.end;
+                state.holidays = state.holidays.filter(x => x.id !== id);
+                saveState();
+                updateUI();
+                DOM.chkShowHolidays.classList.add('checked');
+                DOM.holidayList.classList.remove('hidden');
+            }
+        };
+
+        window.deletePause = function(id) {
+            state.pauses = state.pauses.filter(x => x.id !== id);
+            saveState();
+            updateUI();
+        };
+
+        window.deleteRevDay = function(day) {
+            showConfirm("Change Revision Dates", "Are you sure you want to remove this revision day? It changes the schedule.", () => {
+                state.revisionDays = state.revisionDays.filter(d => d !== day);
+                saveState();
+                updateUI();
+                closeConfirm();
+            });
+        };
+
+        /** === EVENT LISTENERS === */
+        function setupEventListeners() {
+            // Modals
+            DOM.modals.welcomeOk.addEventListener('click', () => {
+                DOM.modals.welcome.style.display = 'none';
+                DOM.settingsPage.style.display = 'block'; // Open settings directly
+            });
+
+            DOM.modals.confirmNo.addEventListener('click', closeConfirm);
+            DOM.modals.confirmYes.addEventListener('click', () => { if(confirmCallback) confirmCallback(); });
+
+            // Navigation
+            DOM.btnOpenSettings.addEventListener('click', () => DOM.settingsPage.style.display = 'block');
+            DOM.btnCloseSettings.addEventListener('click', () => DOM.settingsPage.style.display = 'none');
+
+            // Inputs Sync
+            DOM.setBookName.addEventListener('change', (e) => { state.firstBookName = e.target.value; saveState(); updateUI(); });
+            DOM.setBookDate.addEventListener('change', (e) => { state.firstBookDate = e.target.value; saveState(); updateUI(); });
+            DOM.viewDate.addEventListener('change', () => renderMainPage());
+
+            // Task Ticks (Delegation)
+            DOM.taskList.addEventListener('click', (e) => {
+                const chk = e.target.closest('.chk-container');
+                if (chk) {
+                    const key = chk.dataset.key;
+                    chk.classList.toggle('checked');
+                    state.ticks[key] = chk.classList.contains('checked');
+                    saveState();
+                    DOM.progressText.textContent = calculateProgress() + "%";
+                }
+            });
+
+            // Holidays
+            DOM.btnAddHoliday.addEventListener('click', () => {
+                if (DOM.holStart.value && DOM.holEnd.value) {
+                    if (new Date(DOM.holStart.value) > new Date(DOM.holEnd.value)) return alert("Start date must be before End date");
+                    state.holidays.push({ id: generateId(), start: DOM.holStart.value, end: DOM.holEnd.value });
+                    DOM.holStart.value = ''; DOM.holEnd.value = '';
+                    saveState(); updateUI();
+                }
+            });
+
+            DOM.chkShowHolidays.addEventListener('click', (e) => {
+                e.target.classList.toggle('checked');
+                DOM.holidayList.classList.toggle('hidden', !e.target.classList.contains('checked'));
+            });
+
+            // Pauses
+            DOM.btnAddPause.addEventListener('click', () => {
+                if (DOM.pauseEnd.value && DOM.pauseRestart.value) {
+                    if (new Date(DOM.pauseEnd.value) > new Date(DOM.pauseRestart.value)) return alert("End date must be before Restart date");
+                    state.pauses.push({ id: generateId(), end: DOM.pauseEnd.value, restart: DOM.pauseRestart.value });
+                    DOM.pauseEnd.value = ''; DOM.pauseRestart.value = '';
+                    saveState(); updateUI();
+                }
+            });
+
+            // Revisions
+            DOM.btnAddRev.addEventListener('click', () => {
+                const val = parseInt(DOM.revInput.value, 10);
+                if (!isNaN(val) && !state.revisionDays.includes(val) && val >= 0) {
+                    showConfirm("Change Revision Dates", "You are about to add a new revision date.", () => {
+                        state.revisionDays.push(val);
+                        state.revisionDays.sort((a,b) => a-b);
+                        DOM.revInput.value = '';
+                        saveState(); updateUI(); closeConfirm();
+                    });
+                }
+            });
+
+            DOM.btnResetRev.addEventListener('click', () => {
+                showConfirm("Reset Revisions", "Restore default revision dates?", () => {
+                    state.revisionDays = [...DEFAULT_REVS];
+                    saveState(); updateUI(); closeConfirm();
+                });
+            });
+
+            // Erase Data
+            DOM.btnEraseData.addEventListener('click', () => {
+                showConfirm("Erase All Data?", "Are you entirely sure? This removes all schedules, ticks, and settings.", () => {
+                    localStorage.removeItem(STORAGE_KEY);
+                    location.reload();
+                });
+            });
+        }
+
+        // Boot
+        init();
     </script>
 </body>
 </html>
