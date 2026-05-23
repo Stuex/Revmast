@@ -143,7 +143,6 @@
         /* Utilities */
         .hidden { display: none !important; }
         .mt-1 { margin-top: 10px; }
-        .mb-2 { margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -212,6 +211,30 @@
             </div>
 
             <div class="settings-section">
+                <h3>Book Making Pauses</h3>
+                <div class="disclaimer">Period where Book Making STOPS, but Revisions CONTINUE.</div>
+                
+                <div class="input-group mt-1" style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display:block; font-size: 0.9em; margin-bottom: 5px; color: #ccc;">1. Stop Book Making</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="date" id="pause-end" title="Stop Date">
+                            <button id="btn-stop-making" style="white-space: nowrap;">Save Stop</button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed #444; padding-top: 15px;">
+                        <label style="display:block; font-size: 0.9em; margin-bottom: 5px; color: #ccc;">2. Restart Book Making</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="date" id="pause-restart" title="Restart Date">
+                            <button id="btn-restart-making" style="white-space: nowrap;">Save Restart</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="pause-list" class="list-items"></div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Revision Dates</h3>
                 <div class="disclaimer">Set intervals (in days) for revisions.</div>
                 <div class="input-row mt-1">
@@ -220,29 +243,6 @@
                     <button id="btn-reset-rev" style="margin-left: auto;">Reset Default</button>
                 </div>
                 <div id="rev-days-list" class="rev-days-container"></div>
-            </div>
-
-            <div class="settings-section">
-                <h3>Book Making Pauses</h3>
-                <div class="disclaimer mb-2">Period where Book Making STOPS, but Revisions CONTINUE. Leaving it without a restart timeline stops it permanently until a restart is logged.</div>
-                
-                <div class="input-row mt-1" style="border-bottom: 1px dashed var(--border); padding-bottom: 15px; margin-bottom: 15px;">
-                    <div style="display:flex; flex-direction:column; gap:5px;">
-                        <label style="font-size:0.85rem; color:#aaa;">Stop Book Making From:</label>
-                        <input type="date" id="pause-end" title="End Date of Book Making">
-                    </div>
-                    <button id="btn-add-pause-stop" style="align-self: flex-end; margin-top: 15px;">Stop Book Making</button>
-                </div>
-
-                <div class="input-row mt-1">
-                    <div style="display:flex; flex-direction:column; gap:5px;">
-                        <label style="font-size:0.85rem; color:#aaa;">Restart Book Making From:</label>
-                        <input type="date" id="pause-restart" title="Restart Date">
-                    </div>
-                    <button id="btn-add-pause-restart" style="align-self: flex-end; margin-top: 15px;">Restart Book Making</button>
-                </div>
-                
-                <div id="pause-list" class="list-items"></div>
             </div>
 
             <div class="settings-section" style="border-color: var(--danger);">
@@ -285,7 +285,7 @@
             firstBookDate: '',
             revisionDays: [...DEFAULT_REVS],
             holidays: [], // {start, end, id}
-            pauses: [], // {end, restart, id} -> restart can be null/empty string for open-ended stops
+            pauses: [], // {end, restart, id}
             ticks: {} // "YYYY-MM-DD|FileName|RevDay": true/false
         };
 
@@ -312,8 +312,8 @@
             
             pauseEnd: document.getElementById('pause-end'),
             pauseRestart: document.getElementById('pause-restart'),
-            btnAddPauseStop: document.getElementById('btn-add-pause-stop'),
-            btnAddPauseRestart: document.getElementById('btn-add-pause-restart'),
+            btnStopMaking: document.getElementById('btn-stop-making'),
+            btnRestartMaking: document.getElementById('btn-restart-making'),
             pauseList: document.getElementById('pause-list'),
             
             revInput: document.getElementById('rev-day-input'),
@@ -409,7 +409,7 @@
         }
 
         /** === ENGINE (LOGIC) === */
-        function buildDateSets(targetDateStr) {
+        function buildDateSets() {
             let holidaySet = new Set();
             let totalHolidayDays = 0;
             state.holidays.forEach(h => {
@@ -420,16 +420,9 @@
 
             let pauseSet = new Set();
             state.pauses.forEach(p => {
-                // If there's an explicit restart timeline
-                if (p.restart) {
-                    getDatesBetween(p.end, p.restart).forEach(d => pauseSet.add(d));
-                } else {
-                    // It is an infinite stop from p.end onwards. 
-                    // Generate dates up through the currently viewed/target date so engine flags it.
-                    if (targetDateStr && targetDateStr >= p.end) {
-                        getDatesBetween(p.end, targetDateStr).forEach(d => pauseSet.add(d));
-                    }
-                }
+                // If there is no restart date, assume the pause is ongoing into the future
+                const endStr = p.restart ? p.restart : '2099-12-31'; 
+                getDatesBetween(p.end, endStr).forEach(d => pauseSet.add(d));
             });
 
             DOM.holidayCountText.textContent = totalHolidayDays;
@@ -439,7 +432,7 @@
         function calculateSchedule(targetDateStr) {
             if (!state.firstBookDate || !state.firstBookName) return null;
 
-            const { holidaySet, pauseSet } = buildDateSets(targetDateStr);
+            const { holidaySet, pauseSet } = buildDateSets();
             
             // If target date is a holiday, absolutely no revisions happen
             if (holidaySet.has(targetDateStr)) return [];
@@ -507,6 +500,8 @@
             
             if (firstD > todayD) return 0;
 
+            // Simplified historical simulation to calculate total completion
+            // Note: Since this could get heavy over many years, we limit to avoid lockup
             let totalTasks = 0;
             let completedTasks = 0;
             let curr = new Date(state.firstBookDate);
@@ -558,7 +553,7 @@
             DOM.taskList.innerHTML = '';
             
             if (!schedule || schedule.length === 0) {
-                const { holidaySet } = buildDateSets(targetDate);
+                const { holidaySet } = buildDateSets();
                 const msg = holidaySet.has(targetDate) ? "Holiday! Enjoy your day off." : "No files scheduled for revision today.";
                 DOM.taskList.innerHTML = `<div class="empty-state">${msg}</div>`;
             } else {
@@ -597,7 +592,7 @@
                 `;
                 DOM.holidayList.appendChild(item);
             });
-            buildDateSets(DOM.viewDate.value || getTodayStr()); // update holiday count
+            buildDateSets(); // update holiday count
 
             // Pauses
             DOM.pauseList.innerHTML = '';
@@ -605,12 +600,14 @@
                 const item = document.createElement('div');
                 item.className = 'list-item';
                 
-                const timelineStr = p.restart 
-                    ? `Stopped: ${p.end} | Restarted: ${p.restart}` 
-                    : `Stopped: ${p.end} | <span style="color: var(--danger);">Stopped Indefinitely</span>`;
+                // Show "Ongoing" in red if there is no restart date yet
+                const statusStr = p.restart ? `Restarted: ${p.restart}` : `<span class="blink" style="color:var(--danger); border:none; box-shadow:none;">Ongoing...</span>`;
                 
                 item.innerHTML = `
-                    <span>${timelineStr}</span>
+                    <div style="display:flex; flex-direction:column; gap: 4px;">
+                        <span style="font-weight:bold;">Stopped: ${p.end}</span>
+                        <span style="font-size:0.85em; color:#aaa;">${statusStr}</span>
+                    </div>
                     <button class="icon-btn" onclick="deletePause('${p.id}')" title="Delete">
                         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
@@ -707,46 +704,33 @@
                 DOM.holidayList.classList.toggle('hidden', !e.target.classList.contains('checked'));
             });
 
-            // Pauses: Action 1 (Stop Book Making)
-            DOM.btnAddPauseStop.addEventListener('click', () => {
-                if (!DOM.pauseEnd.value) return alert("Please select a date to stop book making.");
+            // Pauses - Separate Stop and Restart logic
+            DOM.btnStopMaking.addEventListener('click', () => {
+                const stopDate = DOM.pauseEnd.value;
+                if (!stopDate) return alert("Please select a Stop date.");
                 
-                // Add an open-ended pause entry
-                state.pauses.push({ 
-                    id: generateId(), 
-                    end: DOM.pauseEnd.value, 
-                    restart: "" 
-                });
+                // Check if there is already a break happening
+                const ongoing = state.pauses.find(p => !p.restart);
+                if (ongoing) return alert("You already have an ongoing break. Please set a Restart Date for it first.");
                 
+                state.pauses.push({ id: generateId(), end: stopDate, restart: null });
                 DOM.pauseEnd.value = '';
-                saveState(); 
-                updateUI();
+                saveState(); updateUI();
             });
 
-            // Pauses: Action 2 (Restart Book Making)
-            DOM.btnAddPauseRestart.addEventListener('click', () => {
-                if (!DOM.pauseRestart.value) return alert("Please select a date to restart book making.");
+            DOM.btnRestartMaking.addEventListener('click', () => {
+                const restartDate = DOM.pauseRestart.value;
+                if (!restartDate) return alert("Please select a Restart date.");
                 
-                // Check if there's an open indefinite stop block to update
-                let lastOpenPause = state.pauses.slice().reverse().find(p => !p.restart);
+                // Find the break that hasn't been closed yet
+                let ongoing = state.pauses.find(p => !p.restart);
+                if (!ongoing) return alert("There is no ongoing break recorded. Please Save a Stop Date first.");
                 
-                if (lastOpenPause) {
-                    if (new Date(lastOpenPause.end) > new Date(DOM.pauseRestart.value)) {
-                        return alert("Restart date must be after the Stop date (" + lastOpenPause.end + ")");
-                    }
-                    lastOpenPause.restart = DOM.pauseRestart.value;
-                } else {
-                    // If no open stop exists, default to starting the timeline from the very first book date
-                    state.pauses.push({
-                        id: generateId(),
-                        end: state.firstBookDate || getTodayStr(),
-                        restart: DOM.pauseRestart.value
-                    });
-                }
+                if (new Date(ongoing.end) > new Date(restartDate)) return alert("Restart date must be after the Stop date.");
                 
+                ongoing.restart = restartDate;
                 DOM.pauseRestart.value = '';
-                saveState(); 
-                updateUI();
+                saveState(); updateUI();
             });
 
             // Revisions
