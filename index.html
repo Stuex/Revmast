@@ -5,631 +5,568 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revmaster</title>
     <style>
-        /* Pure Black UI & Minimalist Design */
+        /* --- 1. UI/UX & Design System --- */
         :root {
-            --bg-color: #000000;
-            --text-color: #ffffff;
-            --accent-color: #888888;
-            --glow-color: rgba(255, 255, 255, 0.3);
-            --danger-color: #ff4444;
+            --bg: #000000;
+            --text: #FFFFFF;
+            --error: #ff3333;
+            --glow: 0 0 8px rgba(255, 255, 255, 0.8);
+            --error-glow: 0 0 8px rgba(255, 51, 51, 0.8);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 650px;
-            position: relative;
-        }
-
-        /* Typography */
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 0px;
-        }
-
-        .credits {
-            font-size: 0.75rem;
-            color: var(--accent-color);
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        h2 { font-size: 1.5rem; margin-bottom: 15px; margin-top: 25px; border-bottom: 1px solid var(--accent-color); padding-bottom: 5px; }
-        
-        /* Inputs & Buttons */
-        input[type="text"], input[type="date"], input[type="number"] {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--accent-color);
-            padding: 10px 14px;
+        /* Forms & Inputs */
+        input, button {
+            background-color: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--text);
+            padding: 10px;
             border-radius: 4px;
+            font-family: inherit;
             font-size: 1rem;
-            width: 100%;
-            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, button:focus {
             outline: none;
-            transition: all 0.2s ease;
+            box-shadow: var(--glow);
         }
 
-        input:focus {
-            border-color: var(--text-color);
-            box-shadow: 0 0 8px var(--glow-color);
-        }
-
-        button {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--accent-color);
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        button:hover {
-            background-color: #222;
-        }
-
-        button.primary { border-color: var(--text-color); font-weight: bold; }
-        button.danger { border-color: var(--danger-color); color: var(--danger-color); }
-        button.danger:hover { background-color: rgba(255, 68, 68, 0.1); }
-
-        /* UI Elements */
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--accent-color);
-            font-size: 1.2rem;
-            padding: 5px;
-            cursor: pointer;
+        input.invalid {
+            border-color: var(--error);
         }
         
-        .icon-btn:hover { color: var(--text-color); }
-
-        .settings-icon {
-            position: absolute;
-            top: 10px;
-            right: 0;
-            font-size: 1.5rem;
+        input.invalid:focus {
+            box-shadow: var(--error-glow);
         }
 
-        /* Top Bar: Date & Progress */
-        .top-bar {
+        button { cursor: pointer; }
+        button:hover { background-color: #222; }
+        button.danger { border-color: var(--error); color: var(--error); }
+        button.danger:hover { background-color: rgba(255, 0, 0, 0.1); }
+
+        /* Typography & Layout */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 15px;
-            border: 1px solid var(--accent-color);
-            border-radius: 6px;
-        }
-
-        .date-display {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .progress-display {
-            font-size: 1.1rem;
-            color: var(--accent-color);
-        }
-        .progress-display span { color: var(--text-color); font-weight: bold; }
-
-        /* List Items */
-        .file-list { list-style: none; }
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 10px;
+            align-items: flex-start;
+            margin-bottom: 30px;
             border-bottom: 1px solid #333;
-            transition: background 0.2s;
-        }
-        .file-item:hover { background: #111; }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            font-size: 1.1rem;
-            width: 100%;
-        }
-        
-        .checkbox-container input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
+            padding-bottom: 15px;
         }
 
-        .checkmark {
-            height: 22px;
-            width: 22px;
-            background-color: transparent;
-            border: 2px solid var(--accent-color);
-            border-radius: 4px;
-            margin-right: 15px;
-            position: relative;
-            transition: all 0.2s;
-        }
+        h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: 1px; }
+        .subtitle { font-size: 0.75rem; opacity: 0.7; margin-top: -5px; }
 
-        .checkbox-container:hover input ~ .checkmark { border-color: var(--text-color); box-shadow: 0 0 5px var(--glow-color);}
-        .checkbox-container input:checked ~ .checkmark { border-color: var(--text-color); background-color: var(--text-color); }
-        .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-            left: 6px;
-            top: 2px;
-            width: 5px;
-            height: 10px;
-            border: solid var(--bg-color);
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
+        .icon-btn {
+            background: none; border: none; font-size: 1.5rem; padding: 5px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .checkbox-container input:checked ~ .checkmark:after { display: block; }
+        .icon-btn:hover { background: none; text-shadow: 0 0 10px #fff; }
 
-        .file-details { flex-grow: 1; display: flex; justify-content: space-between;}
-        .rev-day-badge { color: var(--bg-color); background-color: var(--accent-color); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;}
+        /* Utilities */
+        .hidden { display: none !important; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* Main Page Specifics */
+        .date-controller {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .date-controller input[type="date"] { border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; padding: 0;}
+
+        .progress-tracker {
+            margin-bottom: 30px; padding: 15px; border: 1px dashed #555; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .progress-pct { font-size: 1.5rem; font-weight: bold; }
+
+        .task-list { list-style: none; }
+        .task-item {
+            display: flex; align-items: center; margin-bottom: 15px; font-size: 1.1rem;
+        }
+        .task-item input[type="checkbox"] {
+            appearance: none; width: 22px; height: 22px; border: 1px solid var(--text);
+            border-radius: 4px; margin-right: 15px; cursor: pointer; position: relative;
+        }
+        .task-item input[type="checkbox"]:checked::after {
+            content: '✔'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 14px;
+        }
+        .task-item input[type="checkbox"]:focus { box-shadow: var(--glow); }
+        .task-item.done { opacity: 0.5; text-decoration: line-through; }
+        .empty-state { text-align: center; opacity: 0.5; margin-top: 40px; }
 
         /* Settings Page Specifics */
-        .disclaimer { font-size: 0.85rem; color: var(--accent-color); margin-bottom: 15px; margin-top: -10px;}
-        .flex-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px;}
-        .flex-row input { margin-bottom: 0; }
-        .holiday-list { margin-bottom: 20px; font-size: 0.9rem;}
-        .holiday-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #333;}
+        .setting-group { margin-bottom: 25px; }
+        .setting-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .setting-group input[type="text"], .setting-group input[type="date"] { width: 100%; }
+        .disclaimer { font-size: 0.8rem; opacity: 0.7; margin-top: 5px; }
+
+        .holiday-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .holiday-row input { flex: 1; }
+        
+        .revision-dates-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;}
+        .rev-box { width: 60px; text-align: center; }
+        
+        .flex-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 
         /* Modals */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
-            z-index: 100;
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center;
+            align-items: center; z-index: 1000;
         }
         .modal-content {
-            background: var(--bg-color); border: 1px solid var(--text-color);
-            padding: 30px; border-radius: 8px; max-width: 400px; text-align: center;
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            background: var(--bg); border: 1px solid var(--text); padding: 25px;
+            max-width: 400px; width: 90%; border-radius: 8px; text-align: center;
+            box-shadow: var(--glow);
         }
-        .hidden { display: none !important; }
+        .modal-content p { margin-bottom: 20px; }
+        .modal-actions button { margin: 0 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <!-- MAIN PAGE -->
-    <div id="mainPage">
-        <button class="icon-btn settings-icon" onclick="togglePage('settingsPage')" title="Settings">⚙️</button>
-        <h1>Revmaster.</h1>
-        <div class="credits">Designed by Pankaj Mehra</div>
-
-        <div class="top-bar">
-            <div class="date-display">
-                <span id="currentDateDisplay">Loading...</span>
-                <input type="date" id="targetDateInput" class="hidden" style="width: auto; margin:0;">
-                <button class="icon-btn" id="editDateBtn" onclick="toggleDateEdit()">✏️</button>
+    <!-- Modals -->
+    <div id="modal-welcome" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Welcome to Revmaster</h3>
+            <p>Please go to Settings and fill in the required data to calculate your revision schedule.</p>
+            <div class="modal-actions">
+                <button onclick="closeModal('modal-welcome'); navigateTo('settings');">OK</button>
             </div>
-            <div class="progress-display">
-                Completion: <span id="completionRate">0%</span>
-            </div>
-        </div>
-
-        <ul class="file-list" id="fileListContainer">
-            <!-- Dynamic Files Injected Here -->
-        </ul>
-        <div id="noTasksMsg" class="hidden" style="text-align: center; color: var(--accent-color); margin-top: 30px;">
-            No revisions scheduled for this date.
         </div>
     </div>
+
+    <div id="modal-rev-warning" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Warning</h3>
+            <p>You are about to change revision dates. This may alter your upcoming schedule.</p>
+            <div class="modal-actions">
+                <button onclick="closeModal('modal-rev-warning'); App.focusRevInput();">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PAGE -->
+    <main id="view-main" class="container">
+        <header>
+            <div>
+                <h1>Revmaster</h1>
+                <div class="subtitle">Designed by Pankaj Mehra</div>
+            </div>
+            <button id="btn-settings" class="icon-btn" onclick="navigateTo('settings')">⚙️</button>
+        </header>
+
+        <div class="date-controller">
+            <input type="date" id="current-date-picker" onchange="App.renderTaskList()">
+            <button onclick="App.setToday()">Today</button>
+        </div>
+
+        <div class="progress-tracker">
+            <div>
+                <div style="font-weight: bold;">Overall Progress</div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Tasks completed till today</div>
+            </div>
+            <div class="progress-pct" id="progress-pct">0%</div>
+        </div>
+
+        <ul class="task-list" id="task-list">
+            <!-- Tasks injected via JS -->
+        </ul>
+    </main>
 
     <!-- SETTINGS PAGE -->
-    <div id="settingsPage" class="hidden">
-        <button class="icon-btn settings-icon" onclick="togglePage('mainPage')" title="Back to Main">✖️</button>
-        <h1>Settings</h1>
-        <div class="credits">Configuration</div>
+    <main id="view-settings" class="container hidden">
+        <header>
+            <div>
+                <h1>Settings</h1>
+                <div class="subtitle">Configure your spaced repetition</div>
+            </div>
+            <button class="icon-btn" onclick="navigateTo('main')">✖</button>
+        </header>
 
-        <h2>Initial Setup</h2>
-        <label>First Book Name</label>
-        <div class="disclaimer">Use the exact name for the first file (Excel/PDF/Notes). For every new file, an incrementing number (1, 2, 3...) will be added. Create only one file per day.</div>
-        <input type="text" id="firstBookName" placeholder="e.g., DW1 or Math Notes 1">
-
-        <label>First Book Date</label>
-        <input type="date" id="firstBookDate">
-
-        <h2>Holiday Management</h2>
-        <div class="disclaimer">Days you didn't create a file. Revisions adjust around these.</div>
-        <div class="flex-row">
-            <input type="date" id="holStart" placeholder="From">
-            <span>to</span>
-            <input type="date" id="holEnd" placeholder="To">
-            <button onclick="addHoliday()">Add</button>
-        </div>
-        <div class="holiday-list" id="holidayListContainer">
-            <!-- Holidays Injected Here -->
+        <div class="setting-group">
+            <label>First Book Name *</label>
+            <input type="text" id="set-book-name" placeholder="e.g. DW" onblur="App.saveSettings()">
+            <div class="disclaimer">Note: Use the exact name for the first file (Excel/PDF/Handwritten notes). For every new file, the app will append 1, 2, 3... to this base name. Create only one file per day.</div>
         </div>
 
-        <h2>Revision Schedule</h2>
-        <div class="disclaimer">Comma separated days (e.g. 0, 1, 3). Changing this affects future calculations.</div>
-        <div class="flex-row">
-            <input type="text" id="revScheduleStr" value="0, 1, 3, 7, 15, 30, 90, 180, 360">
-            <button onclick="saveRevisionDates()">Save</button>
-            <button onclick="resetRevisionDates()">Default</button>
+        <div class="setting-group">
+            <label>First Book Date *</label>
+            <input type="date" id="set-book-date" onblur="App.saveSettings()">
         </div>
 
-        <h2>Danger Zone</h2>
-        <button class="danger" onclick="confirmResetAll()">Erase All Data & Reset</button>
-
-        <br><br>
-        <button class="primary" style="width: 100%; margin-top: 20px;" onclick="saveSettingsAndReturn()">Save Settings & Return</button>
-    </div>
-</div>
-
-<!-- Welcome / Warning Modal -->
-<div id="modal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <h2 id="modalTitle">Message</h2>
-        <p id="modalBody" style="margin-bottom: 20px;"></p>
-        <div id="modalActions">
-            <button class="primary" onclick="closeModal()">OK</button>
+        <div class="setting-group">
+            <label>Holidays</label>
+            <div id="holiday-list"></div>
+            <div class="flex-row">
+                <label style="font-weight: normal; font-size: 0.9rem;">
+                    <input type="checkbox" id="show-holidays" onchange="App.renderHolidays()" style="margin-right:5px;"> Show all
+                </label>
+                <div style="font-size: 0.9rem;">Total Holidays: <span id="total-holidays">0</span></div>
+            </div>
+            <button style="margin-top: 10px; width: 100%;" onclick="App.addHoliday()">+ Add Holiday Range</button>
         </div>
-    </div>
-</div>
 
-<script>
-    // --- STATE MANAGEMENT ---
-    let appData = {
-        settings: {
-            isConfigured: false,
-            firstBookName: "",
-            firstBookDate: "",
-            holidays: [], // array of {start: "YYYY-MM-DD", end: "YYYY-MM-DD"}
-            revisionDays: [0, 1, 3, 7, 15, 30, 90, 180, 360]
-        },
-        ticks: {} // format: "fileName_revDay": boolean
-    };
+        <div class="setting-group">
+            <label>Revision Dates (in days)</label>
+            <div class="revision-dates-container" id="rev-dates-container"></div>
+            <div class="flex-row">
+                <button onclick="App.addRevDate()">+ Add</button>
+                <button onclick="App.popRevDate()">- Delete</button>
+                <button onclick="App.resetRevDates()">Set to Default</button>
+            </div>
+        </div>
 
-    let viewDate = new Date(); // The date currently being viewed on main page
+        <div class="setting-group" style="margin-top: 50px; text-align: center; border-top: 1px solid #333; padding-top: 20px;">
+            <p class="disclaimer" style="margin-bottom: 10px;">Are you sure? This will permanently remove all your dates, file schedules, and progress.</p>
+            <button class="danger" onclick="App.factoryReset()">Erase Data and Reset</button>
+        </div>
+    </main>
 
-    // --- INITIALIZATION ---
-    function initApp() {
-        const stored = localStorage.getItem("revmaster_data");
-        if (stored) {
-            appData = JSON.parse(stored);
-        } else {
-            showModal("Welcome to Revmaster", "Go to Settings and fill in the required data to run the app.", () => {
-                togglePage("settingsPage");
-            });
-        }
+    <script>
+        // --- UTILITIES ---
+        const $ = id => document.getElementById(id);
+        const getLocalDateStr = (d = new Date()) => {
+            const offset = d.getTimezoneOffset();
+            d = new Date(d.getTime() - (offset*60*1000));
+            return d.toISOString().split('T')[0];
+        };
+        const getDaysDiff = (d1, d2) => Math.round((new Date(d2) - new Date(d1)) / (1000 * 3600 * 24));
+        const addDays = (dStr, days) => {
+            let d = new Date(dStr);
+            d.setUTCDate(d.getUTCDate() + days);
+            return d.toISOString().split('T')[0];
+        };
 
-        if(!appData.settings.revisionDays || appData.settings.revisionDays.length === 0) {
-            appData.settings.revisionDays = [0, 1, 3, 7, 15, 30, 90, 180, 360];
-        }
+        const navigateTo = (view) => {
+            $('view-main').classList.add('hidden');
+            $('view-settings').classList.add('hidden');
+            $(`view-${view}`).classList.remove('hidden');
+            if(view === 'main') App.initMainPage();
+        };
 
-        populateSettingsForm();
-        
-        if (appData.settings.isConfigured) {
-            renderMainPage(viewDate);
-        } else {
-            togglePage("settingsPage");
-        }
-    }
+        const closeModal = (id) => $(id).classList.add('hidden');
+        const showModal = (id) => $(id).classList.remove('hidden');
 
-    function saveData() {
-        localStorage.setItem("revmaster_data", JSON.stringify(appData));
-    }
-
-    // --- ENGINE LOGIC ---
-    
-    // Strips out numbers at the end to get the base string and the starting number
-    function parseFileName(name) {
-        const match = name.trim().match(/^(.*?)(\d+)$/);
-        if (match) {
-            return { base: match[1], startNum: parseInt(match[2], 10) };
-        }
-        return { base: name.trim() + " ", startNum: 1 };
-    }
-
-    // Zeroes out time for strict day comparisons
-    function getStartOfDay(d) {
-        const date = new Date(d);
-        date.setHours(0, 0, 0, 0);
-        return date;
-    }
-
-    function isHoliday(dateObj) {
-        const checkTime = getStartOfDay(dateObj).getTime();
-        for (let h of appData.settings.holidays) {
-            const s = getStartOfDay(h.start).getTime();
-            const e = getStartOfDay(h.end).getTime();
-            if (checkTime >= s && checkTime <= e) return true;
-        }
-        return false;
-    }
-
-    function formatDateStr(dateObj) {
-        return dateObj.toISOString().split('T')[0];
-    }
-
-    function renderMainPage(targetDateObj) {
-        if (!appData.settings.isConfigured) return;
-
-        const dateDisplay = document.getElementById("currentDateDisplay");
-        dateDisplay.innerText = targetDateObj.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-        document.getElementById("targetDateInput").value = formatDateStr(targetDateObj);
-
-        const listContainer = document.getElementById("fileListContainer");
-        listContainer.innerHTML = "";
-        
-        const nameData = parseFileName(appData.settings.firstBookName);
-        let currentDay = getStartOfDay(appData.settings.firstBookDate);
-        const targetDay = getStartOfDay(targetDateObj);
-        let fileCounter = nameData.startNum;
-        
-        let filesToday = [];
-        let totalGlobalTasks = 0;
-        let completedGlobalTasks = 0;
-
-        const currentActualDate = getStartOfDay(new Date());
-
-        // We calculate tasks from the first book date up to the current real date for progress,
-        // while extracting today's revisions during the same loop.
-        const loopEndDate = currentActualDate > targetDay ? currentActualDate : targetDay;
-
-        while (currentDay <= loopEndDate) {
-            if (isHoliday(currentDay)) {
-                currentDay.setDate(currentDay.getDate() + 1);
-                continue;
-            }
-
-            const fileName = nameData.base + fileCounter;
+        // --- CORE APPLICATION ---
+        const App = {
+            data: {
+                firstVisit: true,
+                settings: {
+                    firstBookName: '',
+                    firstBookDate: '',
+                    holidays: [],
+                    revisionDates: [0, 1, 3, 7, 15, 30, 90, 180, 360]
+                },
+                progress: {} // Format: {"DW1-Day0": true}
+            },
             
-            // Check all revision milestones for this file
-            appData.settings.revisionDays.forEach(revOffset => {
-                const revDate = new Date(currentDay);
-                revDate.setDate(revDate.getDate() + revOffset);
-                const revTime = getStartOfDay(revDate).getTime();
+            pendingRevTarget: null, // Used for warning modal focus
 
-                // If this specific revision falls on our TARGET view date, queue it for display
-                if (revTime === targetDay.getTime()) {
-                    filesToday.push({ fileName, revOffset, id: `${fileName}_${revOffset}` });
+            init() {
+                this.loadData();
+                if (this.data.firstVisit) {
+                    showModal('modal-welcome');
+                    this.data.firstVisit = false;
+                    this.saveData();
                 }
-
-                // Global Stats: Count towards completion ONLY if the revision date is <= TODAY
-                if (revTime <= currentActualDate.getTime()) {
-                    totalGlobalTasks++;
-                    if (appData.ticks[`${fileName}_${revOffset}`]) {
-                        completedGlobalTasks++;
-                    }
-                }
-            });
-
-            fileCounter++;
-            currentDay.setDate(currentDay.getDate() + 1);
-        }
-
-        // Render Today's tasks
-        if (filesToday.length === 0) {
-            document.getElementById("noTasksMsg").classList.remove("hidden");
-        } else {
-            document.getElementById("noTasksMsg").classList.add("hidden");
-            filesToday.forEach(task => {
-                const li = document.createElement("li");
-                li.className = "file-item";
                 
-                const isChecked = appData.ticks[task.id] ? "checked" : "";
+                // Initialize Inputs
+                $('set-book-name').value = this.data.settings.firstBookName;
+                $('set-book-date').value = this.data.settings.firstBookDate;
+                
+                this.setToday();
+                this.renderHolidays();
+                this.renderRevDates();
+                this.initMainPage();
+            },
 
-                li.innerHTML = `
-                    <label class="checkbox-container">
-                        <input type="checkbox" onchange="toggleTick('${task.id}', this.checked)" ${isChecked}>
-                        <span class="checkmark"></span>
-                        <div class="file-details">
-                            <span>${task.fileName}</span>
-                            <span class="rev-day-badge">Day ${task.revOffset}</span>
-                        </div>
-                    </label>
-                `;
-                listContainer.appendChild(li);
-            });
-        }
+            loadData() {
+                const stored = localStorage.getItem('revmaster_data');
+                if (stored) this.data = JSON.parse(stored);
+            },
 
-        // Render Completion Stats
-        const percent = totalGlobalTasks === 0 ? 0 : Math.round((completedGlobalTasks / totalGlobalTasks) * 100);
-        document.getElementById("completionRate").innerText = `${percent}%`;
-    }
+            saveData() {
+                localStorage.setItem('revmaster_data', JSON.stringify(this.data));
+            },
 
-    function toggleTick(taskId, isChecked) {
-        if (isChecked) {
-            appData.ticks[taskId] = true;
-        } else {
-            delete appData.ticks[taskId];
-        }
-        saveData();
-        renderMainPage(viewDate); // re-render to update percentages instantly
-    }
+            saveSettings() {
+                const nameInput = $('set-book-name');
+                const dateInput = $('set-book-date');
+                
+                this.data.settings.firstBookName = nameInput.value.trim();
+                this.data.settings.firstBookDate = dateInput.value;
+                
+                nameInput.classList.toggle('invalid', !this.data.settings.firstBookName);
+                dateInput.classList.toggle('invalid', !this.data.settings.firstBookDate);
+                
+                this.saveData();
+            },
 
-    // --- UI INTERACTIONS ---
+            initMainPage() {
+                // Check missing requirements
+                const reqMet = this.data.settings.firstBookName && this.data.settings.firstBookDate;
+                $('btn-settings').classList.toggle('blink', !reqMet);
+                
+                this.renderTaskList();
+                this.calculateProgress();
+            },
 
-    function togglePage(pageId) {
-        document.getElementById("mainPage").classList.add("hidden");
-        document.getElementById("settingsPage").classList.add("hidden");
-        document.getElementById(pageId).classList.remove("hidden");
-        if(pageId === 'mainPage' && appData.settings.isConfigured) {
-            renderMainPage(viewDate);
-        }
-    }
+            setToday() {
+                $('current-date-picker').value = getLocalDateStr();
+                this.renderTaskList();
+            },
 
-    function toggleDateEdit() {
-        const display = document.getElementById("currentDateDisplay");
-        const input = document.getElementById("targetDateInput");
-        const btn = document.getElementById("editDateBtn");
+            // --- ENGINE & LOGIC ---
 
-        if (input.classList.contains("hidden")) {
-            input.classList.remove("hidden");
-            display.classList.add("hidden");
-            btn.innerText = "✅";
-        } else {
-            if(input.value) {
-                viewDate = new Date(input.value);
+            isHoliday(dateStr) {
+                return this.data.settings.holidays.some(h => h.from && h.to && dateStr >= h.from && dateStr <= h.to);
+            },
+
+            getFilesGeneratedUpTo(targetDateStr) {
+                const { firstBookDate, holidays } = this.data.settings;
+                if (!firstBookDate || targetDateStr < firstBookDate) return [];
+
+                let files = [];
+                let currStr = firstBookDate;
+                let fileNum = 1;
+
+                // Simulate chronological progression
+                while (currStr <= targetDateStr) {
+                    if (!this.isHoliday(currStr)) {
+                        files.push({ date: currStr, num: fileNum });
+                        fileNum++;
+                    }
+                    currStr = addDays(currStr, 1);
+                }
+                return files;
+            },
+
+            renderTaskList() {
+                const listEl = $('task-list');
+                listEl.innerHTML = '';
+                
+                const { firstBookName, firstBookDate, revisionDates } = this.data.settings;
+                const viewedDate = $('current-date-picker').value;
+
+                if (!firstBookName || !firstBookDate) {
+                    listEl.innerHTML = '<div class="empty-state">Settings missing. Please setup your first book and date.</div>';
+                    return;
+                }
+
+                if (viewedDate < firstBookDate) {
+                    listEl.innerHTML = '<div class="empty-state">No tasks available before the first book date.</div>';
+                    return;
+                }
+
+                // Get all files created ON or BEFORE the viewed date
+                const files = this.getFilesGeneratedUpTo(viewedDate);
+                let tasksFound = false;
+
+                files.forEach(file => {
+                    const daysSinceCreation = getDaysDiff(file.date, viewedDate);
+                    
+                    if (revisionDates.includes(daysSinceCreation)) {
+                        tasksFound = true;
+                        const taskId = `${firstBookName}${file.num}-Day${daysSinceCreation}`;
+                        const isChecked = this.data.progress[taskId] || false;
+                        
+                        const li = document.createElement('li');
+                        li.className = `task-item ${isChecked ? 'done' : ''}`;
+                        li.innerHTML = `
+                            <input type="checkbox" id="${taskId}" ${isChecked ? 'checked' : ''}>
+                            <label for="${taskId}">${firstBookName}${file.num} - Day ${daysSinceCreation} Revision</label>
+                        `;
+                        
+                        // Checkbox event listener
+                        li.querySelector('input').addEventListener('change', (e) => {
+                            this.data.progress[taskId] = e.target.checked;
+                            li.classList.toggle('done', e.target.checked);
+                            this.saveData();
+                            this.calculateProgress(); // Update tracker
+                        });
+
+                        listEl.appendChild(li);
+                    }
+                });
+
+                if (!tasksFound) {
+                    listEl.innerHTML = '<div class="empty-state">No revisions scheduled for this date. Take a break!</div>';
+                }
+            },
+
+            calculateProgress() {
+                const { firstBookName, firstBookDate, revisionDates } = this.data.settings;
+                if (!firstBookName || !firstBookDate) return;
+
+                const todayStr = getLocalDateStr();
+                const files = this.getFilesGeneratedUpTo(todayStr);
+                
+                let totalTasks = 0;
+                let completedTasks = 0;
+
+                files.forEach(file => {
+                    revisionDates.forEach(revInterval => {
+                        const taskDate = addDays(file.date, revInterval);
+                        if (taskDate <= todayStr) {
+                            totalTasks++;
+                            const taskId = `${firstBookName}${file.num}-Day${revInterval}`;
+                            if (this.data.progress[taskId]) completedTasks++;
+                        }
+                    });
+                });
+
+                const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+                $('progress-pct').innerText = `${pct}%`;
+            },
+
+            // --- SETTINGS LOGIC ---
+
+            renderHolidays() {
+                const container = $('holiday-list');
+                container.innerHTML = '';
+                const showAll = $('show-holidays').checked;
+                
+                let visibleHolidays = this.data.settings.holidays;
+                if (!showAll && visibleHolidays.length > 2) visibleHolidays = visibleHolidays.slice(0, 2);
+
+                visibleHolidays.forEach((hol, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'holiday-row';
+                    row.innerHTML = `
+                        <input type="date" value="${hol.from}" onchange="App.updateHoliday(${idx}, 'from', this.value)">
+                        <span>to</span>
+                        <input type="date" value="${hol.to}" onchange="App.updateHoliday(${idx}, 'to', this.value)">
+                        <button class="icon-btn" style="font-size:1rem; padding: 0 5px;" onclick="App.deleteHoliday(${idx})">🗑️</button>
+                    `;
+                    container.appendChild(row);
+                });
+
+                // Calculate total holidays (Merging overlaps)
+                let total = 0;
+                const validHols = this.data.settings.holidays.filter(h => h.from && h.to && h.from <= h.to)
+                                     .sort((a,b) => a.from.localeCompare(b.from));
+                
+                if (validHols.length > 0) {
+                    let merged = [ {...validHols[0]} ];
+                    for(let i=1; i<validHols.length; i++) {
+                        let last = merged[merged.length-1];
+                        let curr = validHols[i];
+                        if (curr.from <= last.to) {
+                            if (curr.to > last.to) last.to = curr.to;
+                        } else {
+                            merged.push({...curr});
+                        }
+                    }
+                    total = merged.reduce((sum, m) => sum + getDaysDiff(m.from, m.to) + 1, 0);
+                }
+                $('total-holidays').innerText = total;
+            },
+
+            addHoliday() {
+                this.data.settings.holidays.push({from: '', to: ''});
+                $('show-holidays').checked = true; // Auto show all when adding
+                this.saveData();
+                this.renderHolidays();
+            },
+
+            updateHoliday(index, field, val) {
+                this.data.settings.holidays[index][field] = val;
+                this.saveData();
+                this.renderHolidays();
+            },
+
+            deleteHoliday(index) {
+                this.data.settings.holidays.splice(index, 1);
+                this.saveData();
+                this.renderHolidays();
+            },
+
+            renderRevDates() {
+                const container = $('rev-dates-container');
+                container.innerHTML = '';
+                this.data.settings.revisionDates.forEach((day, idx) => {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'rev-box';
+                    input.value = day;
+                    
+                    // Trigger Warning Modal on focus
+                    input.addEventListener('focus', (e) => {
+                        if (!input.dataset.warned) {
+                            e.target.blur(); // Prevent immediate editing
+                            this.pendingRevTarget = input;
+                            showModal('modal-rev-warning');
+                        }
+                    });
+
+                    input.addEventListener('change', (e) => {
+                        this.data.settings.revisionDates[idx] = parseInt(e.target.value) || 0;
+                        this.saveData();
+                    });
+
+                    container.appendChild(input);
+                });
+            },
+
+            focusRevInput() {
+                closeModal('modal-rev-warning');
+                if (this.pendingRevTarget) {
+                    this.pendingRevTarget.dataset.warned = "true";
+                    this.pendingRevTarget.focus();
+                }
+            },
+
+            addRevDate() {
+                this.data.settings.revisionDates.push(0);
+                this.saveData();
+                this.renderRevDates();
+            },
+
+            popRevDate() {
+                if (this.data.settings.revisionDates.length > 0) {
+                    this.data.settings.revisionDates.pop();
+                    this.saveData();
+                    this.renderRevDates();
+                }
+            },
+
+            resetRevDates() {
+                this.data.settings.revisionDates = [0, 1, 3, 7, 15, 30, 90, 180, 360];
+                this.saveData();
+                this.renderRevDates();
+            },
+
+            factoryReset() {
+                if(confirm('Are you absolutely sure? All data will be permanently wiped.')) {
+                    localStorage.removeItem('revmaster_data');
+                    location.reload();
+                }
             }
-            input.classList.add("hidden");
-            display.classList.remove("hidden");
-            btn.innerText = "✏️";
-            renderMainPage(viewDate);
-        }
-    }
+        };
 
-    // --- SETTINGS LOGIC ---
-    
-    function populateSettingsForm() {
-        if(appData.settings.firstBookName) document.getElementById("firstBookName").value = appData.settings.firstBookName;
-        if(appData.settings.firstBookDate) document.getElementById("firstBookDate").value = appData.settings.firstBookDate;
-        document.getElementById("revScheduleStr").value = appData.settings.revisionDays.join(", ");
-        renderHolidays();
-    }
+        // Initialize App on DOM load
+        document.addEventListener('DOMContentLoaded', () => App.init());
 
-    function renderHolidays() {
-        const container = document.getElementById("holidayListContainer");
-        container.innerHTML = "";
-        let total = 0;
-        appData.settings.holidays.forEach((h, index) => {
-            const start = new Date(h.start);
-            const end = new Date(h.end);
-            const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            total += days;
-
-            container.innerHTML += `
-                <div class="holiday-item">
-                    <span>${h.start} to ${h.end} (${days} days)</span>
-                    <div>
-                        <button class="icon-btn" onclick="removeHoliday(${index})">❌</button>
-                    </div>
-                </div>
-            `;
-        });
-        if(total > 0) {
-            container.innerHTML += `<div style="text-align:right; font-size:0.8rem; color: var(--accent-color);">Total Holiday Days: ${total}</div>`;
-        }
-    }
-
-    function addHoliday() {
-        const s = document.getElementById("holStart").value;
-        const e = document.getElementById("holEnd").value;
-        if(!s || !e) { alert("Select both dates."); return; }
-        if(new Date(s) > new Date(e)) { alert("End date must be after start date."); return; }
-        
-        appData.settings.holidays.push({start: s, end: e});
-        document.getElementById("holStart").value = "";
-        document.getElementById("holEnd").value = "";
-        saveData();
-        renderHolidays();
-    }
-
-    function removeHoliday(index) {
-        appData.settings.holidays.splice(index, 1);
-        saveData();
-        renderHolidays();
-    }
-
-    function saveRevisionDates() {
-        const str = document.getElementById("revScheduleStr").value;
-        const arr = str.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-        
-        showModal("Warning", "You are about to change the revision schedule. This affects all future and past uncompleted tasks. Proceed?", () => {
-            appData.settings.revisionDays = arr.sort((a,b)=>a-b);
-            saveData();
-            closeModal();
-            populateSettingsForm();
-        }, true);
-    }
-
-    function resetRevisionDates() {
-        appData.settings.revisionDays = [0, 1, 3, 7, 15, 30, 90, 180, 360];
-        document.getElementById("revScheduleStr").value = appData.settings.revisionDays.join(", ");
-        saveData();
-    }
-
-    function saveSettingsAndReturn() {
-        const name = document.getElementById("firstBookName").value;
-        const date = document.getElementById("firstBookDate").value;
-
-        if (!name || !date) {
-            alert("First Book Name and Date are required.");
-            return;
-        }
-
-        appData.settings.firstBookName = name;
-        appData.settings.firstBookDate = date;
-        appData.settings.isConfigured = true;
-        saveData();
-        
-        viewDate = new Date(); // Reset to today on save
-        togglePage("mainPage");
-    }
-
-    function confirmResetAll() {
-        showModal("ERASE DATA", "Are you sure? This will permanently remove all your dates, file schedules, and completion ticks.", () => {
-            localStorage.removeItem("revmaster_data");
-            location.reload();
-        }, true);
-    }
-
-    // --- MODAL UTILS ---
-    let modalCallback = null;
-    
-    function showModal(title, body, callback, isConfirm = false) {
-        document.getElementById("modalTitle").innerText = title;
-        document.getElementById("modalBody").innerText = body;
-        const actions = document.getElementById("modalActions");
-        
-        modalCallback = callback;
-
-        if(isConfirm) {
-            actions.innerHTML = `
-                <button onclick="closeModal()">Cancel</button>
-                <button class="danger" onclick="executeModalCallback()">Confirm</button>
-            `;
-        } else {
-            actions.innerHTML = `<button class="primary" onclick="executeModalCallback()">OK</button>`;
-        }
-        
-        document.getElementById("modal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-        document.getElementById("modal").classList.add("hidden");
-        modalCallback = null;
-    }
-
-    function executeModalCallback() {
-        if(modalCallback) modalCallback();
-        else closeModal();
-    }
-
-    // Boot app
-    window.onload = initApp;
-
-</script>
+    </script>
 </body>
 </html>
