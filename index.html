@@ -2,842 +2,1021 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Revmaster</title>
+    <!-- Safari Web App Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Revmaster</title>
+    <meta name="apple-mobile-web-app-title" content="Revmaster">
+    
     <style>
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
-            --error-color: #ff3333;
-            --glow: 0 0 8px rgba(255, 255, 255, 0.6);
-            --error-glow: 0 0 8px rgba(255, 51, 51, 0.6);
-            --spacing: 1.5rem;
-            --border-radius: 6px;
+            --text-muted: #888888;
+            --border-color: #ffffff;
+            --border-dim: #333333;
+            --glow-color: #ffffff;
+            --error-color: #ff3b30;
+            --radius: 6px;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: transparent;
+            color: var(--text-color);
+            font-family: var(--font-family);
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            color-scheme: dark; /* Ensures default date picker is dark */
+            align-items: flex-start;
+            padding: 24px 16px;
+            overflow-x: hidden;
+            color-scheme: dark;
         }
 
-        #app {
+        .container {
             width: 100%;
-            max-width: 600px;
-            padding: 2rem 1.5rem;
-            position: relative;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
         }
 
-        /* Typography */
-        h1.title {
-            font-size: 3rem;
+        .hidden {
+            display: none !important;
+        }
+
+        /* Typography & Utilities */
+        h1 {
+            font-size: 2.5rem;
             font-weight: 800;
-            letter-spacing: 2px;
-            margin-bottom: 0.2rem;
+            letter-spacing: -0.05em;
+            line-height: 1.1;
         }
 
         .credit {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            margin-bottom: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
         }
 
-        h2, h3 {
-            margin-bottom: 1rem;
-            font-weight: 600;
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-dim);
+            padding-bottom: 6px;
         }
 
-        /* Inputs & Buttons */
+        /* Interactive Elements */
         input[type="text"], input[type="date"], input[type="number"] {
-            background: transparent;
-            border: 1px solid var(--text-color);
-            color: var(--text-color);
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
             width: 100%;
-            transition: all 0.2s ease;
+            height: 42px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 0 12px;
+            font-size: 0.95rem;
             outline: none;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         input:focus {
-            box-shadow: var(--glow);
+            box-shadow: 0 0 8px var(--glow-color);
         }
 
-        input.required-empty {
-            border-color: var(--error-color);
-            box-shadow: var(--error-glow);
+        input.invalid {
+            border-color: var(--error-color) !important;
         }
 
         button {
-            background: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
+            height: 42px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            border-radius: var(--radius);
+            padding: 0 16px;
+            font-size: 0.9rem;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 8px;
+            transition: box-shadow 0.2s ease, opacity 0.2s ease;
         }
 
-        button:hover, button:active {
-            box-shadow: var(--glow);
+        button:active {
+            opacity: 0.7;
         }
 
-        button.danger {
-            border-color: var(--error-color);
-            color: var(--error-color);
+        button.icon-btn {
+            width: 42px;
+            padding: 0;
+            flex-shrink: 0;
         }
 
-        button.danger:hover {
-            box-shadow: var(--error-glow);
-        }
-
-        /* Icons */
-        .icon-btn {
-            background: transparent;
-            border: 1px solid var(--text-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            padding: 8px;
-            transition: box-shadow 0.2s;
-        }
-
-        .icon-btn svg {
-            fill: var(--text-color);
-            width: 100%;
-            height: 100%;
-        }
-
-        .icon-btn:hover {
-            box-shadow: var(--glow);
-        }
-
-        .blink {
-            animation: blink-border 1s infinite alternate;
-        }
-
-        @keyframes blink-border {
-            0% { border-color: var(--error-color); box-shadow: var(--error-glow); }
-            100% { border-color: transparent; box-shadow: none; }
-        }
-
-        /* Layout & Utilities */
-        .flex-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .flex-between {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .mt-2 { margin-top: var(--spacing); }
-        .mb-2 { margin-bottom: var(--spacing); }
-        
-        .hidden { display: none !important; }
-
-        /* Main Page Specific */
-        .header-top {
+        /* Specific Layout Blocks */
+        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
 
-        .date-picker-container {
-            position: relative;
-            display: inline-flex;
+        .settings-toggle {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            width: 42px;
+            height: 42px;
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            cursor: pointer;
         }
 
-        .date-picker-container input[type="date"] {
-            border: none;
-            padding: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            width: auto;
+        @keyframes blink-border {
+            0% { border-color: var(--border-color); box-shadow: none; }
+            50% { border-color: var(--error-color); box-shadow: 0 0 8px var(--error-color); }
+            100% { border-color: var(--border-color); box-shadow: none; }
         }
 
-        .edit-icon {
+        .blink {
+            animation: blink-border 1.5s infinite ease-in-out;
+        }
+
+        .date-display-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius);
+        }
+
+        .checkbox-container {
+            position: relative;
             width: 20px;
             height: 20px;
             cursor: pointer;
-            fill: var(--text-color);
-            opacity: 0.7;
         }
 
-        .edit-icon:hover {
-            opacity: 1;
-            filter: drop-shadow(0 0 5px white);
-        }
-
-        .task-stats {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            border: 1px solid var(--text-color);
-            border-radius: var(--border-radius);
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        .task-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
-        }
-
-        .task-item:hover {
-            border-color: var(--text-color);
-        }
-
-        /* Checkbox styling */
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .checkbox-wrapper input {
-            display: none;
+        .checkbox-container input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
         .checkmark {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--text-color);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
         }
 
-        .checkbox-wrapper input:checked + .checkmark {
-            background-color: var(--text-color);
-        }
-
-        .checkbox-wrapper input:checked + .checkmark::after {
+        .checkbox-container input:checked ~ .checkmark::after {
             content: "";
-            width: 6px;
-            height: 12px;
-            border: solid var(--bg-color);
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid var(--text-color);
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
-            margin-bottom: 2px;
         }
 
-        .task-label {
-            flex-grow: 1;
+        .metric-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
         }
 
-        .task-day-tag {
-            font-size: 0.85rem;
-            padding: 0.2rem 0.6rem;
-            border: 1px solid var(--text-color);
-            border-radius: 20px;
-            opacity: 0.8;
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-top: 4px;
         }
 
-        /* Settings Page Specific */
-        .settings-header {
+        /* Dynamic Form Management Layouts */
+        .dynamic-row {
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 8px;
         }
 
-        .settings-section {
-            margin-bottom: 2.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 1.5rem;
+        .dynamic-list {
+            margin-bottom: 12px;
         }
-
-        .settings-section:first-child { border-top: none; padding-top: 0; }
 
         .disclaimer {
             font-size: 0.8rem;
-            opacity: 0.7;
-            margin-top: 0.5rem;
+            color: var(--text-muted);
             line-height: 1.4;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-left: 1px solid var(--border-color);
         }
 
-        .range-item {
+        .form-group {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
         }
 
-        .range-item input {
-            padding: 0.5rem;
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
-        .remove-btn {
-            background: transparent;
-            border: none;
-            color: var(--error-color);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0 0.5rem;
-        }
-
-        .revision-grid {
+        .footer-summary {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            justify-content: space-between;
         }
 
-        .revision-box {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--text-color);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-        }
-
-        .revision-box span { font-size: 0.9rem; }
-        
-        .revision-box button {
-            background: none;
-            border: none;
-            padding: 0;
-            margin: 0;
-            color: var(--text-color);
-            font-size: 1rem;
-            line-height: 1;
-            height: auto;
-        }
-
-        /* Modal Overlay */
+        /* Modal / Dialog Base Structure */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            padding: 16px;
             z-index: 1000;
-            backdrop-filter: blur(4px);
         }
 
         .modal-box {
-            background: var(--bg-color);
-            border: 1px solid var(--text-color);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-            box-shadow: var(--glow);
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Custom revision day items configuration layout */
+        .rev-days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .rev-day-chip {
+            border: 1px solid var(--border-dim);
+            border-radius: var(--radius);
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .rev-day-chip button {
+            border: none;
+            height: auto;
+            padding: 0 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 32px 16px;
+            border: 1px dashed var(--border-dim);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <!-- MODALS -->
-    <div id="welcomeModal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h2>Welcome to Revmaster</h2>
-            <p class="mb-2">Go to Settings and fill in the required data to calculate your revision schedule.</p>
-            <button onclick="closeWelcomeModal()" style="width: 100%;">OK</button>
-        </div>
-    </div>
-
-    <!-- MAIN PAGE -->
-    <div id="mainPage">
-        <div class="header-top">
+    <div class="container" id="main-view">
+        <!-- Header Unit -->
+        <div class="header-row">
             <div>
-                <h1 class="title">Revmaster.</h1>
+                <h1>Revmaster</h1>
                 <div class="credit">Designed by Pankaj Mehra</div>
             </div>
-            <button id="settingsBtn" class="icon-btn" onclick="openSettings()">
-                <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-            </button>
+            <div class="settings-toggle" id="gear-btn" tabindex="0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
         </div>
 
-        <div class="date-picker-container">
-            <input type="date" id="currentDateInput" onchange="renderMainPage()">
-            <svg class="edit-icon" onclick="document.getElementById('currentDateInput').showPicker()" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        <!-- Date Shift Unit -->
+        <div class="date-display-container">
+            <span>Date:</span>
+            <span id="date-text" style="text-decoration: underline; cursor: pointer;"></span>
+            <div id="date-input-wrapper" class="hidden" style="display:inline-flex; gap:6px;">
+                <input type="date" id="target-date-picker" style="width: 140px; height: 32px; padding: 0 6px;">
+                <button id="save-date-btn" class="icon-btn" style="width:32px; height:32px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+            </div>
+            <button id="edit-date-btn" class="icon-btn" style="border:none; width:auto; height:auto; padding:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         </div>
 
-        <div class="task-stats">
-            <div id="completionText">Task complete: 0%</div>
-            <div class="disclaimer mt-2" style="font-size: 0.7rem;">Formula: {(Total Unticked) / (Total Ticked + Unticked)} * 100</div>
+        <!-- File List Section -->
+        <div>
+            <div class="section-title">Revisions Due Today</div>
+            <div class="file-list" id="file-list-target"></div>
         </div>
 
-        <div id="noDataMsg" class="hidden" style="text-align: center; margin-top: 3rem; opacity: 0.7;">
-            No revision files scheduled for this date.
+        <!-- Metric Component -->
+        <div class="metric-card">
+            <div class="section-title" style="border:none; margin:0;">Task Completion</div>
+            <div class="metric-value" id="completion-metric">0%</div>
         </div>
-
-        <ul class="task-list" id="taskList">
-            <!-- Rendered by JS -->
-        </ul>
     </div>
 
-    <!-- SETTINGS PAGE -->
-    <div id="settingsPage" class="hidden">
-        <div class="settings-header">
-            <h2>Settings</h2>
-            <button class="icon-btn" onclick="closeSettings()" style="border-radius: 5px;">
-                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-        </div>
-
-        <div class="settings-section">
-            <h3>Required Data</h3>
-            <div class="mb-2">
-                <label>First Book Name</label>
-                <input type="text" id="setFirstBookName" placeholder="e.g., DW1" oninput="handleInputValidate(this)">
-                <div class="disclaimer">Use the exact name for the first file. For every new file, we add 1, 2, 3... to it. Only one file per day is tracked.</div>
-            </div>
+    <div class="container hidden" id="settings-view">
+        <!-- Settings Header Unit -->
+        <div class="header-row">
             <div>
-                <label>First Book Date</label>
-                <input type="date" id="setFirstBookDate" oninput="handleInputValidate(this)">
-                <div class="disclaimer">The date the first book was created.</div>
+                <h1>Settings</h1>
+                <div class="credit">Configuration Panel</div>
+            </div>
+            <button class="icon-btn" id="close-settings-btn" style="border-radius: 50%;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+
+        <!-- System Param Inputs -->
+        <div class="form-group">
+            <label for="first-book-name">First Book Name</label>
+            <div class="disclaimer">Use the exact name for the first file. (Excel/PDF/handwritten notes). For every new file, add 1, 2, 3, and so on to the first file name. Create only one file per day.</div>
+            <input type="text" id="first-book-name" placeholder="e.g., DW1">
+        </div>
+
+        <div class="form-group">
+            <label for="first-book-date">First Book Date</label>
+            <input type="date" id="first-book-date">
+        </div>
+
+        <!-- Holiday Ranges Component -->
+        <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>Holiday Ranges</label>
+                <button id="add-holiday-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">+ Add Range</button>
+            </div>
+            <div style="margin: 6px 0; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="toggle-holidays-list" checked style="accent-color:#fff;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Show input lists</span>
+            </div>
+            <div id="holiday-list-container" class="dynamic-list"></div>
+            <div class="footer-summary">
+                <span>Total Holiday Days:</span>
+                <span id="total-holiday-count" style="font-weight:bold;">0</span>
             </div>
         </div>
 
-        <div class="settings-section">
-            <div class="flex-between mb-2">
-                <h3>Holidays</h3>
-                <button onclick="addRange('holidays')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">+ Add</button>
+        <!-- Revision Matrix Unit -->
+        <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label>Revision Framework Intervals</label>
+                <button id="reset-rev-days-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">Reset Defaults</button>
             </div>
-            <div class="disclaimer mb-2">Days with no book making and no revision.</div>
-            <div id="holidaysList"></div>
-            <div class="mt-2" style="font-size: 0.9rem;">Total Holiday Days: <span id="totalHolidays">0</span></div>
+            <div class="rev-days-grid" id="rev-days-container"></div>
+            <div style="display:flex; gap:8px;">
+                <input type="number" id="new-rev-day-input" placeholder="e.g., 45" style="height:32px;">
+                <button id="add-rev-day-btn" style="height:32px; padding:0 12px; font-size:0.85rem;">Add Day</button>
+            </div>
         </div>
 
-        <div class="settings-section">
-            <div class="flex-between mb-2">
-                <h3>Book Making Pauses</h3>
-                <button onclick="addRange('pauses')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">+ Add</button>
+        <!-- System Halts / Lifecycle Multi-inputs -->
+        <div class="form-group" style="border-top: 1px solid var(--border-dim); padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label>Creation Halts (Revision Persists)</label>
+                <button id="add-halt-btn" style="height:28px; padding:0 8px; font-size:0.8rem;">+ Add Block</button>
             </div>
-            <div class="disclaimer mb-2">End of book making, but revision goes on until restarted.</div>
-            <div id="pausesList"></div>
+            <div id="halt-list-container" class="dynamic-list"></div>
         </div>
 
-        <div class="settings-section">
-            <h3>Revision Dates</h3>
-            <div class="disclaimer mb-2">Default is: 0, 1, 3, 7, 15, 30, 90, 180, 360</div>
-            <div class="revision-grid" id="revisionGrid">
-                <!-- Rendered by JS -->
-            </div>
-            <div class="flex-row">
-                <input type="number" id="newRevisionDay" placeholder="Day #" style="width: 100px;">
-                <button onclick="addRevision()">Add</button>
-            </div>
-            <button class="mt-2" onclick="resetRevisions()" style="width: 100%; font-size: 0.9rem;">Set to Default</button>
-        </div>
-
-        <div class="settings-section">
-            <button class="danger" onclick="factoryReset()" style="width: 100%;">Erase All Data & Reset</button>
+        <!-- Clear State Trigger Section -->
+        <div style="margin-top: 20px; border-top: 1px solid var(--border-dim); padding-top: 20px;">
+            <div class="disclaimer" style="border-left-color: var(--error-color);">Danger Zone: Resetting will completely drop all internal schedules, parameters, history logging, and tracking metrics permanently.</div>
+            <button id="factory-reset-btn" style="width:100%; border-color:var(--error-color); color:var(--error-color);">Erase Data and Reset</button>
         </div>
     </div>
-</div>
 
-<script>
-    /* --- STATE MANAGEMENT --- */
-    const DEFAULT_REVISIONS = [0, 1, 3, 7, 15, 30, 90, 180, 360];
-    const STORAGE_KEY = 'revmaster_data';
+    <!-- Global Application Modal Stack -->
+    <div class="modal-overlay hidden" id="app-modal">
+        <div class="modal-box">
+            <h3 id="modal-title">Notification</h3>
+            <p id="modal-body" style="font-size:0.9rem; line-height:1.5; color:var(--text-muted);"></p>
+            <div class="modal-buttons">
+                <button id="modal-cancel-btn" class="hidden">Cancel</button>
+                <button id="modal-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
 
-    let state = {
-        isFirstVisit: true,
-        firstBookName: '',
-        firstBookDate: '',
-        holidays: [], // {from: date, to: date}
-        pauses: [],   // {from: date, to: date}
-        revisionDays: [...DEFAULT_REVISIONS],
-        completedTasks: {} // "DW1_3": true
-    };
+    <script>
+        // State Management Objects
+        const CONFIG = {
+            storageKeys: {
+                firstBookName: 'revmaster_book_name',
+                firstBookDate: 'revmaster_book_date',
+                holidays: 'revmaster_holidays',
+                revDays: 'revmaster_rev_days',
+                halts: 'revmaster_halts',
+                ticks: 'revmaster_ticks',
+                visited: 'revmaster_visited'
+            },
+            defaultRevDays: [0, 1, 3, 7, 15, 30, 90, 180, 360]
+        };
 
-    function loadState() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            state = { ...state, ...JSON.parse(saved) };
-        }
-    }
+        let state = {
+            firstBookName: '',
+            firstBookDate: '',
+            holidays: [], // array of {from: '', to: ''}
+            revDays: [...CONFIG.defaultRevDays],
+            halts: [], // array of {end: '', restart: ''}
+            ticks: {}, // map of "fileName_dayX" -> boolean
+            currentViewDate: new Date().toISOString().split('T')[0]
+        };
 
-    function saveState() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
+        // DOM Initializers
+        const mainView = document.getElementById('main-view');
+        const settingsView = document.getElementById('settings-view');
+        const gearBtn = document.getElementById('gear-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const dateText = document.getElementById('date-text');
+        const dateInputWrapper = document.getElementById('date-input-wrapper');
+        const targetDatePicker = document.getElementById('target-date-picker');
+        const saveDateBtn = document.getElementById('save-date-btn');
+        const editDateBtn = document.getElementById('edit-date-btn');
+        const fileListTarget = document.getElementById('file-list-target');
+        const completionMetric = document.getElementById('completion-metric');
 
-    /* --- DATE & LOGIC ENGINE --- */
-    function getTodayStr() {
-        const d = new Date();
-        const tzOffset = d.getTimezoneOffset() * 60000;
-        return new Date(d - tzOffset).toISOString().split('T')[0];
-    }
+        const inputFirstBookName = document.getElementById('first-book-name');
+        const inputFirstBookDate = document.getElementById('first-book-date');
+        const holidayListContainer = document.getElementById('holiday-list-container');
+        const toggleHolidaysList = document.getElementById('toggle-holidays-list');
+        const totalHolidayCount = document.getElementById('total-holiday-count');
+        const addHolidayBtn = document.getElementById('add-holiday-btn');
+        const revDaysContainer = document.getElementById('rev-days-container');
+        const newRevDayInput = document.getElementById('new-rev-day-input');
+        const addRevDayBtn = document.getElementById('add-rev-day-btn');
+        const resetRevDaysBtn = document.getElementById('reset-rev-days-btn');
+        const haltListContainer = document.getElementById('halt-list-container');
+        const addHaltBtn = document.getElementById('add-halt-btn');
+        const factoryResetBtn = document.getElementById('factory-reset-btn');
 
-    function diffDays(d1Str, d2Str) {
-        const d1 = new Date(d1Str);
-        const d2 = new Date(d2Str);
-        return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-    }
+        const appModal = document.getElementById('app-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalOkBtn = document.getElementById('modal-ok-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
-    function isDateInRange(dateStr, rangeArr) {
-        for (let r of rangeArr) {
-            if (r.from && r.to) {
-                if (dateStr >= r.from && dateStr <= r.to) return true;
+        // Modal Engine Trigger
+        function showModal(title, text, confirmMode = false, onConfirm = null) {
+            modalTitle.textContent = title;
+            modalBody.textContent = text;
+            appModal.classList.remove('hidden');
+            
+            if (confirmMode) {
+                modalCancelBtn.classList.remove('hidden');
+            } else {
+                modalCancelBtn.classList.add('hidden');
             }
+
+            modalOkBtn.onclick = () => {
+                appModal.classList.add('hidden');
+                if (onConfirm) onConfirm();
+            };
+            modalCancelBtn.onclick = () => {
+                appModal.classList.add('hidden');
+            };
         }
-        return false;
-    }
 
-    function isHoliday(dateStr) { return isDateInRange(dateStr, state.holidays); }
-    function isPaused(dateStr) { return isDateInRange(dateStr, state.pauses); }
+        // Data Storage Engine Syncs
+        function loadState() {
+            state.firstBookName = localStorage.getItem(CONFIG.storageKeys.firstBookName) || '';
+            state.firstBookDate = localStorage.getItem(CONFIG.storageKeys.firstBookDate) || '';
+            
+            const rawHolidays = localStorage.getItem(CONFIG.storageKeys.holidays);
+            state.holidays = rawHolidays ? JSON.parse(rawHolidays) : [];
 
-    function getNextDateStr(dateStr) {
-        const d = new Date(dateStr);
-        d.setUTCDate(d.getUTCDate() + 1);
-        return d.toISOString().split('T')[0];
-    }
+            const rawRevDays = localStorage.getItem(CONFIG.storageKeys.revDays);
+            state.revDays = rawRevDays ? JSON.parse(rawRevDays) : [...CONFIG.defaultRevDays];
+            state.revDays.sort((a, b) => a - b);
 
-    function generateBookName(base, index) {
-        if (index === 0) return base;
-        const match = base.match(/^(.*?)(\d+)$/);
-        if (match) {
-            return match[1] + (parseInt(match[2], 10) + index);
+            const rawHalts = localStorage.getItem(CONFIG.storageKeys.halts);
+            state.halts = rawHalts ? JSON.parse(rawHalts) : [];
+
+            const rawTicks = localStorage.getItem(CONFIG.storageKeys.ticks);
+            state.ticks = rawTicks ? JSON.parse(rawTicks) : {};
         }
-        return base + (index + 1);
-    }
 
-    // Engine Core: Simulate history to accurately calculate tasks
-    function runEngine(upToTargetDateStr) {
-        if (!state.firstBookDate || !state.firstBookName) return null;
+        function saveStateParam(key, value) {
+            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+        }
 
-        let walkStr = state.firstBookDate;
-        let bookIndex = 0;
-        let currentLogicalDay = 0;
-        
-        let booksGenerated = [];
-        let totalHistoricalTasks = 0;
-        let untickedHistoricalTasks = 0;
+        // Data processing Engine Logic
+        function parseDate(dateStr) {
+            const parts = dateStr.split('-');
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
 
-        // Simulate day by day up to the current date to gather ALL stats and today's schedule
-        while (walkStr <= upToTargetDateStr) {
-            let hol = isHoliday(walkStr);
-            let pau = isPaused(walkStr);
+        function formatDateDisplay(dateStr) {
+            const d = parseDate(dateStr);
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
 
-            if (!hol) {
-                if (!pau) {
-                    booksGenerated.push({
-                        name: generateBookName(state.firstBookName, bookIndex),
-                        creationStr: walkStr,
-                        logicalCreationDay: currentLogicalDay
-                    });
-                    bookIndex++;
+        function isDateInRanges(dateObj, ranges, mode = 'holiday') {
+            const time = dateObj.getTime();
+            for (let r of ranges) {
+                if (mode === 'holiday') {
+                    if (!r.from || !r.to) continue;
+                    const start = parseDate(r.from).getTime();
+                    const end = parseDate(r.to).getTime();
+                    if (time >= start && time <= end) return true;
+                } else if (mode === 'halt') {
+                    if (!r.end) continue;
+                    const start = parseDate(r.end).getTime();
+                    const end = r.restart ? parseDate(r.restart).getTime() : Infinity;
+                    if (time >= start && time <= end) return true;
                 }
-                currentLogicalDay++;
             }
-            walkStr = getNextDateStr(walkStr);
+            return false;
         }
 
-        let targetLogicalDay = currentLogicalDay - 1; 
-        // If the target date was a holiday, we don't increment logical day, but the loop above already handles it
-        if (isHoliday(upToTargetDateStr)) {
-            // Target is a holiday, logic day doesn't advance. 
-            // Revisions are completely paused on holidays.
-        }
-
-        let todaySchedule = [];
-
-        // Calculate stats and build today's schedule
-        booksGenerated.forEach(b => {
-            let ageAtTarget = targetLogicalDay - b.logicalCreationDay;
-
-            // For history: Every revision day <= ageAtTarget was a task that occurred
-            state.revisionDays.forEach(revDay => {
-                if (revDay <= ageAtTarget) {
-                    totalHistoricalTasks++;
-                    let taskId = `${b.name}_${revDay}`;
-                    if (!state.completedTasks[taskId]) {
-                        untickedHistoricalTasks++;
+        function countTotalHolidays() {
+            let total = 0;
+            state.holidays.forEach(r => {
+                if (r.from && r.to) {
+                    const s = parseDate(r.from);
+                    const e = parseDate(r.to);
+                    if (e >= s) {
+                        total += Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
                     }
                 }
-                // Is it strictly scheduled for the target day?
-                // It's due today if its exact logical age is the revision day, 
-                // AND today is not a holiday.
-                if (revDay === ageAtTarget && !isHoliday(upToTargetDateStr)) {
-                    todaySchedule.push({
-                        bookName: b.name,
-                        revisionDay: revDay,
-                        taskId: `${b.name}_${revDay}`
+            });
+            totalHolidayCount.textContent = total;
+        }
+
+        // Processing Framework Timeline Mapping Matrix
+        function buildTimelineStructure(targetDateStr) {
+            if (!state.firstBookDate || !state.firstBookName) return { filesMap: {}, dueToday: [], metrics: { completed: 0, total: 0 } };
+
+            const startDate = parseDate(state.firstBookDate);
+            const endDate = parseDate(targetDateStr);
+            
+            if (endDate < startDate) return { filesMap: {}, dueToday: [], metrics: { completed: 0, total: 0 } };
+
+            // Tracks the map of each calendar date to what file was made on it
+            let fileCreationMap = {}; 
+            let currentFileIdx = 1;
+
+            let loopDate = new Date(startDate);
+            const endLoopTime = endDate.getTime();
+
+            // Extract numeric root token from user base configuration string
+            const baseMatch = state.firstBookName.match(/^([a-zA-Z\s_-]+)?(\d+)?$/);
+            let prefix = baseMatch && baseMatch[1] ? baseMatch[1] : "DW";
+            let startNum = baseMatch && baseMatch[2] ? parseInt(baseMatch[2], 10) : 1;
+
+            // Generate structural baseline chronological maps up to target context date
+            while (loopDate.getTime() <= endLoopTime) {
+                if (isDateInRanges(loopDate, state.holidays, 'holiday')) {
+                    loopDate.setDate(loopDate.getDate() + 1);
+                    continue;
+                }
+
+                const isHalted = isDateInRanges(loopDate, state.halts, 'halt');
+                const currentDateKey = loopDate.toISOString().split('T')[0];
+
+                if (!isHalted) {
+                    const currentFileNum = startNum + currentFileIdx - 1;
+                    const computedFileName = `${prefix}${currentFileNum}`;
+                    fileCreationMap[currentDateKey] = computedFileName;
+                    currentFileIdx++;
+                } else {
+                    fileCreationMap[currentDateKey] = null; // No file creation, tracking active revision frame window only
+                }
+
+                loopDate.setDate(loopDate.getDate() + 1);
+            }
+
+            // Extract scheduling calculations matrix for the evaluation target scope date
+            let dueToday = [];
+            let totalTasksToDateCount = 0;
+            let completedTasksToDateCount = 0;
+
+            const targetTime = endDate.getTime();
+            const isTargetHoliday = isDateInRanges(endDate, state.holidays, 'holiday');
+
+            // Global evaluation scan over all baseline generation nodes
+            let evaluationLoopDate = new Date(startDate);
+            while (evaluationLoopDate.getTime() <= targetTime) {
+                const evalDateKey = evaluationLoopDate.toISOString().split('T')[0];
+                
+                if (isDateInRanges(evaluationLoopDate, state.holidays, 'holiday')) {
+                    evaluationLoopDate.setDate(evaluationLoopDate.getDate() + 1);
+                    continue;
+                }
+
+                // Calculate assignments for tasks generated on past dates
+                let activeDaysSinceCreation = 0;
+                let ageRunner = new Date(evaluationLoopDate);
+                
+                while (ageRunner.getTime() <= targetTime) {
+                    const runnerKey = ageRunner.toISOString().split('T')[0];
+                    if (!isDateInRanges(ageRunner, state.holidays, 'holiday')) {
+                        // Check tasks due exactly *on the runner date* relative to creation baseline element
+                        state.revDays.forEach(dayInterval => {
+                            if (activeDaysSinceCreation === dayInterval) {
+                                const fileCreated = fileCreationMap[evalDateKey];
+                                if (fileCreated) {
+                                    const taskKey = `${fileCreated}_day${dayInterval}`;
+                                    const isDone = !!state.ticks[taskKey];
+                                    
+                                    // Process tracking increments up to current targeted view perspective state
+                                    totalTasksToDateCount++;
+                                    if (isDone) completedTasksToDateCount++;
+
+                                    if (runnerKey === targetDateStr && !isTargetHoliday) {
+                                        dueToday.push({
+                                            fileName: fileCreated,
+                                            interval: dayInterval,
+                                            taskKey: taskKey,
+                                            checked: isDone
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                        activeDaysSinceCreation++;
+                    }
+                    ageRunner.setDate(ageRunner.getDate() + 1);
+                }
+
+                evaluationLoopDate.setDate(evaluationLoopDate.getDate() + 1);
+            }
+
+            return {
+                dueToday: dueToday,
+                metrics: {
+                    completed: completedTasksToDateCount,
+                    total: totalTasksToDateCount
+                }
+            };
+        }
+
+        // Interface Render Engines
+        function renderMainInterface() {
+            dateText.textContent = formatDateDisplay(state.currentViewDate);
+            targetDatePicker.value = state.currentViewDate;
+
+            // Validate configuration dependencies are met
+            if (!state.firstBookName || !state.firstBookDate) {
+                gearBtn.classList.add('blink');
+                fileListTarget.innerHTML = `<div class="empty-state">Required parameters unassigned.<br>Access settings block to resolve initialization values.</div>`;
+                completionMetric.textContent = "0%";
+                return;
+            }
+
+            gearBtn.classList.remove('blink');
+            const dataPackage = buildTimelineStructure(state.currentViewDate);
+
+            // Print targeted checklist output collection sets
+            if (dataPackage.dueToday.length === 0) {
+                fileListTarget.innerHTML = `<div class="empty-state">No revision files scheduled for today.</div>`;
+            } else {
+                fileListTarget.innerHTML = '';
+                dataPackage.dueToday.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'file-row';
+
+                    const labelId = `chk-${item.taskKey}`;
+                    row.innerHTML = `
+                        <label class="checkbox-container" for="${labelId}">
+                            <input type="checkbox" id="${labelId}" ${item.checked ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                        </label>
+                        <div style="font-size: 0.95rem; font-weight: 500;">${item.fileName} <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 6px;">Day ${item.interval}</span></div>
+                    `;
+
+                    // Dynamic checkbox event pipeline
+                    row.querySelector('input').addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            state.ticks[item.taskKey] = true;
+                        } else {
+                            delete state.ticks[item.taskKey];
+                        }
+                        saveStateParam(CONFIG.storageKeys.ticks, state.ticks);
+                        
+                        // Local recalculation bypass layout stutter
+                        const updatePackage = buildTimelineStructure(state.currentViewDate);
+                        calculateMetricsDisplay(updatePackage.metrics);
+                    });
+
+                    fileListTarget.appendChild(row);
+                });
+            }
+
+            calculateMetricsDisplay(dataPackage.metrics);
+        }
+
+        function calculateMetricsDisplay(metrics) {
+            if (metrics.total === 0) {
+                completionMetric.textContent = "0%";
+            } else {
+                const percentage = Math.round((metrics.completed / metrics.total) * 100);
+                completionMetric.textContent = `${percentage}%`;
+            }
+        }
+
+        function renderSettingsInterface() {
+            inputFirstBookName.value = state.firstBookName;
+            inputFirstBookDate.value = state.firstBookDate;
+            
+            // Check structural validity outlines dynamically
+            verifyRequiredSettingsFields();
+
+            countTotalHolidays();
+            renderHolidayInputRows();
+            renderRevisionDaysFrameworkGrid();
+            renderHaltInputRows();
+        }
+
+        function verifyRequiredSettingsFields() {
+            if (!state.firstBookName) inputFirstBookName.classList.add('invalid');
+            else inputFirstBookName.classList.remove('invalid');
+
+            if (!state.firstBookDate) inputFirstBookDate.classList.add('invalid');
+            else inputFirstBookDate.classList.remove('invalid');
+        }
+
+        function renderHolidayInputRows() {
+            if (!toggleHolidaysList.checked) {
+                holidayListContainer.innerHTML = '';
+                return;
+            }
+
+            holidayListContainer.innerHTML = '';
+            state.holidays.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'dynamic-row';
+                row.innerHTML = `
+                    <span style="font-size:0.8rem; color:var(--text-muted); width:45px;">R${index+1}</span>
+                    <input type="date" value="${item.from}" class="hl-from" style="height:34px;">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">to</span>
+                    <input type="date" value="${item.to}" class="hl-to" style="height:34px;">
+                    <button class="icon-btn del-hl-btn" style="height:34px; width:34px; border-color:var(--border-dim);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                `;
+
+                // Interactive inline capture listeners
+                row.querySelector('.hl-from').addEventListener('change', (e) => {
+                    state.holidays[index].from = e.target.value;
+                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
+                    countTotalHolidays();
+                });
+                row.querySelector('.hl-to').addEventListener('change', (e) => {
+                    state.holidays[index].to = e.target.value;
+                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
+                    countTotalHolidays();
+                });
+                row.querySelector('.del-hl-btn').addEventListener('click', () => {
+                    state.holidays.splice(index, 1);
+                    saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
+                    countTotalHolidays();
+                    renderHolidayInputRows();
+                });
+
+                holidayListContainer.appendChild(row);
+            });
+        }
+
+        function renderRevisionDaysFrameworkGrid() {
+            revDaysContainer.innerHTML = '';
+            state.revDays.forEach(day => {
+                const chip = document.createElement('div');
+                chip.className = 'rev-day-chip';
+                chip.innerHTML = `
+                    <span>Day ${day}</span>
+                    <button data-day="${day}">✕</button>
+                `;
+                chip.querySelector('button').addEventListener('click', (e) => {
+                    const targetDay = parseInt(e.target.getAttribute('data-day'), 10);
+                    showModal("Change Revision Date", "You are about to change the revision date matrix structure.", true, () => {
+                        state.revDays = state.revDays.filter(d => d !== targetDay);
+                        saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
+                        renderRevisionDaysFrameworkGrid();
+                    });
+                });
+                revDaysContainer.appendChild(chip);
+            });
+        }
+
+        function renderHaltInputRows() {
+            haltListContainer.innerHTML = '';
+            state.halts.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'dynamic-row';
+                row.innerHTML = `
+                    <input type="date" value="${item.end}" class="halt-end" style="height:34px;" placeholder="End production">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Restart</span>
+                    <input type="date" value="${item.restart || ''}" class="halt-restart" style="height:34px;">
+                    <button class="icon-btn del-halt-btn" style="height:34px; width:34px; border-color:var(--border-dim);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                `;
+
+                row.querySelector('.halt-end').addEventListener('change', (e) => {
+                    state.halts[index].end = e.target.value;
+                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
+                });
+                row.querySelector('.halt-restart').addEventListener('change', (e) => {
+                    state.halts[index].restart = e.target.value;
+                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
+                });
+                row.querySelector('.del-halt-btn').addEventListener('click', () => {
+                    state.halts.splice(index, 1);
+                    saveStateParam(CONFIG.storageKeys.halts, state.halts);
+                    renderHaltInputRows();
+                });
+
+                haltListContainer.appendChild(row);
+            });
+        }
+
+        // View Toggling Handlers
+        function initViewRouting() {
+            gearBtn.addEventListener('click', () => {
+                mainView.classList.add('hidden');
+                settingsView.classList.remove('hidden');
+                renderSettingsInterface();
+            });
+
+            closeSettingsBtn.addEventListener('click', () => {
+                if (!state.firstBookName || !state.firstBookDate) {
+                    showModal("Missing Inputs", "Please enter valid configuration fields for Book Name and Startup Baseline Date.");
+                    verifyRequiredSettingsFields();
+                    return;
+                }
+                settingsView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+                renderMainInterface();
+            });
+
+            // Inline Date Picker toggle interfaces
+            editDateBtn.addEventListener('click', () => {
+                dateText.classList.add('hidden');
+                editDateBtn.classList.add('hidden');
+                dateInputWrapper.classList.remove('hidden');
+            });
+
+            dateText.addEventListener('click', () => {
+                dateText.classList.add('hidden');
+                editDateBtn.classList.add('hidden');
+                dateInputWrapper.classList.remove('hidden');
+            });
+
+            saveDateBtn.addEventListener('click', () => {
+                if (targetDatePicker.value) {
+                    state.currentViewDate = targetDatePicker.value;
+                    dateInputWrapper.classList.add('hidden');
+                    dateText.classList.remove('hidden');
+                    editDateBtn.classList.remove('hidden');
+                    renderMainInterface();
+                }
+            });
+        }
+
+        // Settings Parameter Pipeline Bindings
+        function initSettingsFormListeners() {
+            inputFirstBookName.addEventListener('change', (e) => {
+                state.firstBookName = e.target.value.trim();
+                saveStateParam(CONFIG.storageKeys.firstBookName, state.firstBookName);
+                verifyRequiredSettingsFields();
+            });
+
+            inputFirstBookDate.addEventListener('change', (e) => {
+                state.firstBookDate = e.target.value;
+                saveStateParam(CONFIG.storageKeys.firstBookDate, state.firstBookDate);
+                verifyRequiredSettingsFields();
+            });
+
+            toggleHolidaysList.addEventListener('change', () => {
+                renderHolidayInputRows();
+            });
+
+            addHolidayBtn.addEventListener('click', () => {
+                state.holidays.push({ from: state.currentViewDate, to: state.currentViewDate });
+                saveStateParam(CONFIG.storageKeys.holidays, state.holidays);
+                renderHolidayInputRows();
+                countTotalHolidays();
+            });
+
+            addRevDayBtn.addEventListener('click', () => {
+                const val = parseInt(newRevDayInput.value, 10);
+                if (!isNaN(val) && val >= 0) {
+                    if (state.revDays.includes(val)) {
+                        showModal("Duplicate Value", "This milestone interval day is already active.");
+                        return;
+                    }
+                    showModal("Change Revision Date", "You are about to change the revision date matrix structure.", true, () => {
+                        state.revDays.push(val);
+                        state.revDays.sort((a, b) => a - b);
+                        saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
+                        newRevDayInput.value = '';
+                        renderRevisionDaysFrameworkGrid();
                     });
                 }
             });
-        });
 
-        return {
-            schedule: todaySchedule,
-            totalTasks: totalHistoricalTasks,
-            untickedTasks: untickedHistoricalTasks
-        };
-    }
+            resetRevDaysBtn.addEventListener('click', () => {
+                showModal("Reset Matrix", "Restore standard tracking intervals?", true, () => {
+                    state.revDays = [...CONFIG.defaultRevDays];
+                    saveStateParam(CONFIG.storageKeys.revDays, state.revDays);
+                    renderRevisionDaysFrameworkGrid();
+                });
+            });
 
-    /* --- UI UPDATES --- */
-    function renderMainPage() {
-        const currentDateInput = document.getElementById('currentDateInput');
-        if (!currentDateInput.value) currentDateInput.value = getTodayStr();
-        const targetDate = currentDateInput.value;
+            addHaltBtn.addEventListener('click', () => {
+                state.halts.push({ end: state.currentViewDate, restart: '' });
+                saveStateParam(CONFIG.storageKeys.halts, state.halts);
+                renderHaltInputRows();
+            });
 
-        checkRequiredFields();
-
-        const engineData = runEngine(targetDate);
-        const list = document.getElementById('taskList');
-        const noData = document.getElementById('noDataMsg');
-        const statsStr = document.getElementById('completionText');
-
-        list.innerHTML = '';
-        if (!engineData || engineData.schedule.length === 0) {
-            noData.classList.remove('hidden');
-        } else {
-            noData.classList.add('hidden');
-            engineData.schedule.forEach(task => {
-                const isChecked = !!state.completedTasks[task.taskId];
-                const li = document.createElement('li');
-                li.className = 'task-item';
-                li.innerHTML = `
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" onchange="toggleTask('${task.taskId}', this.checked)" ${isChecked ? 'checked' : ''}>
-                        <span class="checkmark"></span>
-                    </label>
-                    <div class="task-label">${task.bookName}</div>
-                    <div class="task-day-tag">Day ${task.revisionDay}</div>
-                `;
-                list.appendChild(li);
+            factoryResetBtn.addEventListener('click', () => {
+                showModal("Confirm Destructive Reset", "Are you absolutely sure? This will remove all your structural settings and saved file scheduling statistics permanently.", true, () => {
+                    localStorage.clear();
+                    loadState();
+                    state.currentViewDate = new Date().toISOString().split('T')[0];
+                    settingsView.classList.add('hidden');
+                    mainView.classList.remove('hidden');
+                    renderMainInterface();
+                    showModal("System Reset Complete", "All local application tracking dictionaries dropped successfully.");
+                });
             });
         }
 
-        if (engineData && engineData.totalTasks > 0) {
-            let pct = Math.round((engineData.untickedTasks / engineData.totalTasks) * 100);
-            statsStr.innerText = `Task complete: ${pct}%`;
-        } else {
-            statsStr.innerText = `Task complete: 0%`;
-        }
-    }
-
-    function toggleTask(taskId, isChecked) {
-        if (isChecked) {
-            state.completedTasks[taskId] = true;
-        } else {
-            delete state.completedTasks[taskId];
-        }
-        saveState();
-        renderMainPage(); // Re-render to update stats
-    }
-
-    /* --- SETTINGS LOGIC --- */
-    function checkRequiredFields() {
-        const btn = document.getElementById('settingsBtn');
-        const nameInput = document.getElementById('setFirstBookName');
-        const dateInput = document.getElementById('setFirstBookDate');
-        
-        let missing = false;
-        if (!state.firstBookName) { nameInput.classList.add('required-empty'); missing = true; }
-        else { nameInput.classList.remove('required-empty'); }
-        
-        if (!state.firstBookDate) { dateInput.classList.add('required-empty'); missing = true; }
-        else { dateInput.classList.remove('required-empty'); }
-
-        if (missing) btn.classList.add('blink');
-        else btn.classList.remove('blink');
-
-        return !missing;
-    }
-
-    function handleInputValidate(el) {
-        if (el.value.trim() !== "") {
-            el.classList.remove('required-empty');
-            if (el.id === 'setFirstBookName') state.firstBookName = el.value.trim();
-            if (el.id === 'setFirstBookDate') state.firstBookDate = el.value;
-            saveState();
-            checkRequiredFields();
-        }
-    }
-
-    function renderSettings() {
-        document.getElementById('setFirstBookName').value = state.firstBookName;
-        document.getElementById('setFirstBookDate').value = state.firstBookDate;
-        
-        renderRanges('holidays');
-        renderRanges('pauses');
-        renderRevisions();
-    }
-
-    function renderRanges(type) {
-        const list = document.getElementById(`${type}List`);
-        list.innerHTML = '';
-        let totalDays = 0;
-
-        state[type].forEach((range, idx) => {
-            if (range.from && range.to) {
-                totalDays += (diffDays(range.from, range.to) + 1);
-            }
+        // App Initializer Lifecycle
+        function runApplicationLifecycle() {
+            loadState();
+            initViewRouting();
+            initSettingsFormListeners();
             
-            const div = document.createElement('div');
-            div.className = 'range-item';
-            div.innerHTML = `
-                <input type="date" value="${range.from}" onchange="updateRange('${type}', ${idx}, 'from', this.value)">
-                <span>to</span>
-                <input type="date" value="${range.to}" onchange="updateRange('${type}', ${idx}, 'to', this.value)">
-                <button class="remove-btn" onclick="removeRange('${type}', ${idx})">&times;</button>
-            `;
-            list.appendChild(div);
-        });
-
-        if (type === 'holidays') {
-            document.getElementById('totalHolidays').innerText = totalDays > 0 ? totalDays : 0;
-        }
-    }
-
-    function addRange(type) {
-        state[type].push({ from: '', to: '' });
-        renderRanges(type);
-    }
-
-    function updateRange(type, idx, field, value) {
-        state[type][idx][field] = value;
-        saveState();
-        renderRanges(type);
-    }
-
-    function removeRange(type, idx) {
-        state[type].splice(idx, 1);
-        saveState();
-        renderRanges(type);
-    }
-
-    function renderRevisions() {
-        const grid = document.getElementById('revisionGrid');
-        grid.innerHTML = '';
-        state.revisionDays.sort((a,b)=>a-b).forEach(day => {
-            const div = document.createElement('div');
-            div.className = 'revision-box';
-            div.innerHTML = `
-                <span>Day ${day}</span>
-                <button onclick="removeRevision(${day})">&times;</button>
-            `;
-            grid.appendChild(div);
-        });
-    }
-
-    function addRevision() {
-        const val = parseInt(document.getElementById('newRevisionDay').value, 10);
-        if (!isNaN(val) && !state.revisionDays.includes(val)) {
-            state.revisionDays.push(val);
-            document.getElementById('newRevisionDay').value = '';
-            saveState();
-            renderRevisions();
-        }
-    }
-
-    function removeRevision(day) {
-        if(confirm(`Remove Day ${day} from revision schedule?`)) {
-            state.revisionDays = state.revisionDays.filter(d => d !== day);
-            saveState();
-            renderRevisions();
-        }
-    }
-
-    function resetRevisions() {
-        if(confirm("Reset revision dates to default?")) {
-            state.revisionDays = [...DEFAULT_REVISIONS];
-            saveState();
-            renderRevisions();
-        }
-    }
-
-    function factoryReset() {
-        if(confirm("Are you sure? This will permanently erase ALL schedules and checked tasks.")) {
-            localStorage.removeItem(STORAGE_KEY);
-            location.reload();
-        }
-    }
-
-    /* --- NAVIGATION --- */
-    function openSettings() {
-        document.getElementById('mainPage').classList.add('hidden');
-        document.getElementById('settingsPage').classList.remove('hidden');
-        renderSettings();
-    }
-
-    function closeSettings() {
-        // Save explicit inputs just in case
-        state.firstBookName = document.getElementById('setFirstBookName').value.trim();
-        state.firstBookDate = document.getElementById('setFirstBookDate').value;
-        saveState();
-        
-        document.getElementById('settingsPage').classList.add('hidden');
-        document.getElementById('mainPage').classList.remove('hidden');
-        renderMainPage();
-    }
-
-    function closeWelcomeModal() {
-        document.getElementById('welcomeModal').classList.add('hidden');
-        state.isFirstVisit = false;
-        saveState();
-        openSettings();
-    }
-
-    /* --- INIT --- */
-    window.onload = () => {
-        loadState();
-        
-        if (state.isFirstVisit) {
-            document.getElementById('welcomeModal').classList.remove('hidden');
-        } else {
-            renderMainPage();
-        }
-
-        // Add Enter key listener for required inputs to remove red outline easily
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
-                e.target.blur();
+            // First time initialization checks
+            const hasVisited = localStorage.getItem(CONFIG.storageKeys.visited);
+            if (!hasVisited) {
+                showModal("Welcome to Revmaster", "Welcome to \"Revmaster\". Select the settings configuration node to provision active initialization values.", false, () => {
+                    localStorage.setItem(CONFIG.storageKeys.visited, 'true');
+                    mainView.classList.add('hidden');
+                    settingsView.classList.remove('hidden');
+                    renderSettingsInterface();
+                });
+            } else {
+                renderMainInterface();
             }
-        });
-    };
-</script>
+        }
+
+        // Entry point assignment
+        window.addEventListener('DOMContentLoaded', runApplicationLifecycle);
+    </script>
 </body>
 </html>
