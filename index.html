@@ -74,15 +74,26 @@
         .subtitle { font-size: 0.75rem; opacity: 0.7; margin-top: -5px; }
 
         .icon-btn {
-            background: none; border: none; font-size: 1.5rem; padding: 5px;
+            background: none; border: none; padding: 8px;
             display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: all 0.2s ease;
         }
-        .icon-btn:hover { background: none; text-shadow: 0 0 10px #fff; }
+        .icon-btn:hover { background: none; text-shadow: 0 0 10px #fff; box-shadow: var(--glow); }
+        .icon-btn svg { width: 24px; height: 24px; }
+
+        /* Settings Blinking Border */
+        .req-blink {
+            border: 1px solid var(--error);
+            animation: borderPulse 1.5s infinite;
+        }
+        @keyframes borderPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.8); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 51, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
+        }
 
         /* Utilities */
         .hidden { display: none !important; }
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
 
         /* Main Page Specifics */
         .date-controller {
@@ -172,7 +183,12 @@
                 <h1>Revmaster</h1>
                 <div class="subtitle">Designed by Pankaj Mehra</div>
             </div>
-            <button id="btn-settings" class="icon-btn" onclick="navigateTo('settings')">⚙️</button>
+            <button id="btn-settings" class="icon-btn" onclick="navigateTo('settings')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
         </header>
 
         <div class="date-controller">
@@ -200,18 +216,22 @@
                 <h1>Settings</h1>
                 <div class="subtitle">Configure your spaced repetition</div>
             </div>
-            <button class="icon-btn" onclick="navigateTo('main')">✖</button>
+            <button class="icon-btn" onclick="navigateTo('main')" style="font-size: 1.2rem; font-weight: bold;">✖</button>
         </header>
 
         <div class="setting-group">
             <label>First Book Name *</label>
-            <input type="text" id="set-book-name" placeholder="e.g. DW" onblur="App.saveSettings()">
-            <div class="disclaimer">Note: Use the exact name for the first file (Excel/PDF/Handwritten notes). For every new file, the app will append 1, 2, 3... to this base name. Create only one file per day.</div>
+            <input type="text" id="set-book-name" placeholder="e.g. DW" 
+                   oninput="App.handleLiveInput(this)" 
+                   onkeydown="App.handleEnterKey(event, 'set-book-date')">
+            <div class="disclaimer">Note: Use the exact name for the first file. For every new file, the app will append 1, 2, 3... to this base name. Create only one file per day.</div>
         </div>
 
         <div class="setting-group">
             <label>First Book Date *</label>
-            <input type="date" id="set-book-date" onblur="App.saveSettings()">
+            <input type="date" id="set-book-date" 
+                   oninput="App.handleLiveInput(this)" 
+                   onkeydown="App.handleEnterKey(event, 'finish')">
         </div>
 
         <div class="setting-group">
@@ -277,27 +297,33 @@
                     holidays: [],
                     revisionDates: [0, 1, 3, 7, 15, 30, 90, 180, 360]
                 },
-                progress: {} // Format: {"DW1-Day0": true}
+                progress: {} 
             },
             
-            pendingRevTarget: null, // Used for warning modal focus
+            pendingRevTarget: null, 
 
             init() {
                 this.loadData();
+                
+                // Initialize Inputs
+                $('set-book-name').value = this.data.settings.firstBookName || '';
+                $('set-book-date').value = this.data.settings.firstBookDate || '';
+                
+                // Set invalid state initially if empty
+                this.validateRequirementState();
+
                 if (this.data.firstVisit) {
                     showModal('modal-welcome');
                     this.data.firstVisit = false;
                     this.saveData();
                 }
-                
-                // Initialize Inputs
-                $('set-book-name').value = this.data.settings.firstBookName;
-                $('set-book-date').value = this.data.settings.firstBookDate;
+
+                // Force default load to Main Page no matter what
+                navigateTo('main');
                 
                 this.setToday();
                 this.renderHolidays();
                 this.renderRevDates();
-                this.initMainPage();
             },
 
             loadData() {
@@ -309,24 +335,49 @@
                 localStorage.setItem('revmaster_data', JSON.stringify(this.data));
             },
 
-            saveSettings() {
-                const nameInput = $('set-book-name');
-                const dateInput = $('set-book-date');
-                
-                this.data.settings.firstBookName = nameInput.value.trim();
-                this.data.settings.firstBookDate = dateInput.value;
-                
-                nameInput.classList.toggle('invalid', !this.data.settings.firstBookName);
-                dateInput.classList.toggle('invalid', !this.data.settings.firstBookDate);
-                
+            // Validation & Instant Input Handling
+            handleLiveInput(el) {
+                // Instantly remove red border on typing/selecting
+                if (el.value.trim() !== '') {
+                    el.classList.remove('invalid');
+                } else {
+                    el.classList.add('invalid');
+                }
+
+                // Immediately save the inputted data
+                this.data.settings.firstBookName = $('set-book-name').value.trim();
+                this.data.settings.firstBookDate = $('set-book-date').value;
                 this.saveData();
+                
+                // Check if blinking border can be removed
+                this.validateRequirementState();
+            },
+
+            handleEnterKey(e, target) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (target === 'finish') {
+                        e.target.blur();
+                        navigateTo('main');
+                    } else {
+                        $(target).focus();
+                    }
+                }
+            },
+
+            validateRequirementState() {
+                const nameValid = this.data.settings.firstBookName !== '';
+                const dateValid = this.data.settings.firstBookDate !== '';
+                
+                $('set-book-name').classList.toggle('invalid', !nameValid);
+                $('set-book-date').classList.toggle('invalid', !dateValid);
+
+                // Blink settings icon border if requirements aren't met
+                $('btn-settings').classList.toggle('req-blink', !(nameValid && dateValid));
             },
 
             initMainPage() {
-                // Check missing requirements
-                const reqMet = this.data.settings.firstBookName && this.data.settings.firstBookDate;
-                $('btn-settings').classList.toggle('blink', !reqMet);
-                
+                this.validateRequirementState();
                 this.renderTaskList();
                 this.calculateProgress();
             },
@@ -343,14 +394,13 @@
             },
 
             getFilesGeneratedUpTo(targetDateStr) {
-                const { firstBookDate, holidays } = this.data.settings;
+                const { firstBookDate } = this.data.settings;
                 if (!firstBookDate || targetDateStr < firstBookDate) return [];
 
                 let files = [];
                 let currStr = firstBookDate;
                 let fileNum = 1;
 
-                // Simulate chronological progression
                 while (currStr <= targetDateStr) {
                     if (!this.isHoliday(currStr)) {
                         files.push({ date: currStr, num: fileNum });
@@ -378,7 +428,6 @@
                     return;
                 }
 
-                // Get all files created ON or BEFORE the viewed date
                 const files = this.getFilesGeneratedUpTo(viewedDate);
                 let tasksFound = false;
 
@@ -397,12 +446,11 @@
                             <label for="${taskId}">${firstBookName}${file.num} - Day ${daysSinceCreation} Revision</label>
                         `;
                         
-                        // Checkbox event listener
                         li.querySelector('input').addEventListener('change', (e) => {
                             this.data.progress[taskId] = e.target.checked;
                             li.classList.toggle('done', e.target.checked);
                             this.saveData();
-                            this.calculateProgress(); // Update tracker
+                            this.calculateProgress();
                         });
 
                         listEl.appendChild(li);
@@ -452,16 +500,16 @@
                 visibleHolidays.forEach((hol, idx) => {
                     const row = document.createElement('div');
                     row.className = 'holiday-row';
+                    // Value is set carefully to handle empty string initialization without auto-filling current date
                     row.innerHTML = `
-                        <input type="date" value="${hol.from}" onchange="App.updateHoliday(${idx}, 'from', this.value)">
+                        <input type="date" value="${hol.from || ''}" onchange="App.updateHoliday(${idx}, 'from', this.value)">
                         <span>to</span>
-                        <input type="date" value="${hol.to}" onchange="App.updateHoliday(${idx}, 'to', this.value)">
+                        <input type="date" value="${hol.to || ''}" onchange="App.updateHoliday(${idx}, 'to', this.value)">
                         <button class="icon-btn" style="font-size:1rem; padding: 0 5px;" onclick="App.deleteHoliday(${idx})">🗑️</button>
                     `;
                     container.appendChild(row);
                 });
 
-                // Calculate total holidays (Merging overlaps)
                 let total = 0;
                 const validHols = this.data.settings.holidays.filter(h => h.from && h.to && h.from <= h.to)
                                      .sort((a,b) => a.from.localeCompare(b.from));
@@ -483,8 +531,9 @@
             },
 
             addHoliday() {
+                // Ensure from/to are purely empty strings so it won't snap to 'today'
                 this.data.settings.holidays.push({from: '', to: ''});
-                $('show-holidays').checked = true; // Auto show all when adding
+                $('show-holidays').checked = true;
                 this.saveData();
                 this.renderHolidays();
             },
@@ -510,10 +559,9 @@
                     input.className = 'rev-box';
                     input.value = day;
                     
-                    // Trigger Warning Modal on focus
                     input.addEventListener('focus', (e) => {
                         if (!input.dataset.warned) {
-                            e.target.blur(); // Prevent immediate editing
+                            e.target.blur();
                             this.pendingRevTarget = input;
                             showModal('modal-rev-warning');
                         }
